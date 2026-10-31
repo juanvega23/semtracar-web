@@ -109,7 +109,15 @@ Otros: RNF-34 `app_config` (T1) · RNF-42 términos y privacidad (T1) · RNF-01 
 ## Migraciones aplicadas
 | Archivo | Turno | Qué hace | ¿Aplicada en producción? |
 |---|---|---|---|
-| | | | |
+| `20261030000000_remote_schema.sql` | T1 | Esquema `public` de producción obtenido con `supabase db dump` (solo lectura). Clave `service_role` y secreto del webhook reemplazados por marcadores | Ya existe en producción. **Nunca aplicarla allí**: marcarla con `supabase migration repair --status applied 20261030000000` antes del primer `db push` |
+| `20261030000100_catalogos.sql` | T1 | Catálogos (estados, métodos de envío, tipos de paquete) con los ids de producción | No (en producción no cambia nada) |
+| `20261030000200_trigger_auth_usuario_nuevo.sql` | T1 | Trigger `auth.users` → `handle_new_user` (casillero, RF-04) solo si no existe | No (en producción no cambia nada) |
+| `20261030010000_proteger_columnas_users.sql` | T1 | **Seguridad:** un usuario no puede cambiarse `role`, `is_admin` ni `casillero` | **No. Urgente**: hoy cualquier cliente puede hacerse admin |
+| `20261030010100_rpc_registro_y_roles.sql` | T1 | RPC `is_email_registered`, `is_name_registered` (RF-02, RF-03) y `set_user_role` (RF-62) | No |
+| `20261030010200_app_config.sql` | T1 | Tabla `app_config` con tarifas, multiplicadores y delivery (RNF-34) | No |
+
+Todas probadas en Supabase local (`supabase db reset`). Solo Juan aplica en producción.
+`src/types/database.ts` está generado desde la base local (incluye lo nuevo); tras el `db push`, regenerarlo con `--linked`.
 
 ## Bitácora de relevos
 Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
