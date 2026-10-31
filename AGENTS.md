@@ -49,6 +49,7 @@ npm ci                 # instalar
 npm run dev            # desarrollo
 npm run lint           # ESLint
 npm run typecheck      # tsc --noEmit
+npm run format         # Prettier (format:check lo verifica en CI)
 npm run test           # Vitest
 npm run build          # build de producción
 supabase gen types typescript --linked > src/types/database.ts   # regenerar tipos
