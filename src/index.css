@@ -1,1 +1,51 @@
 @import 'tailwindcss';
+
+/* Identidad SEMTRACAR (RNF-19): colores tomados del logo y de la referencia visual. */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Naranja de marca: botones principales, pestaña activa */
+  --color-brand-50: #fff6f1;
+  --color-brand-100: #ffe8db;
+  --color-brand-200: #ffcbb0;
+  --color-brand-300: #ffa274;
+  --color-brand-400: #fe7a3d;
+  --color-brand-500: #fc5207;
+  --color-brand-600: #e04502;
+  --color-brand-700: #b93805;
+  --color-brand-800: #932f0c;
+  --color-brand-900: #77290d;
+
+  /* Azul marino: títulos y texto fuerte */
+  --color-ink-50: #f4f6fb;
+  --color-ink-100: #e7ebf5;
+  --color-ink-200: #c9d1e7;
+  --color-ink-300: #9aa7cf;
+  --color-ink-400: #6676b0;
+  --color-ink-500: #445494;
+  --color-ink-600: #34427a;
+  --color-ink-700: #2b3664;
+  --color-ink-800: #222e5e;
+  --color-ink-900: #21284b;
+
+  /* Azul de marca: "Listo para recoger", enlaces */
+  --color-accent-50: #eef5ff;
+  --color-accent-100: #d9e8ff;
+  --color-accent-500: #256fdd;
+  --color-accent-600: #1b5bc0;
+  --color-accent-700: #18499a;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-slate-50 font-sans text-ink-900 antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
