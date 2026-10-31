@@ -4,13 +4,13 @@
 > (brief §7.3 y §7.4). Manda sobre el brief en cuanto a avance y decisiones.
 
 ## Turno actual
-**T1 · Juan**. Estado: Pendiente
+**T1 · Juan**. Estado: En curso
 Siguiente: T2 · Daviana
 
 ## Turnos
 | Turno | Integrante | Alcance | Estado | Tag | Inicio | Cierre |
 |---|---|---|---|---|---|---|
-| T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features, Issues | Pendiente | `turno-1-juan` | | |
+| T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features, Issues | En curso | `turno-1-juan` | 30-oct-2026 | |
 | T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Pendiente | `turno-2-daviana` | | |
 | T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | Pendiente | `turno-3-alberto` | | |
 | T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | Pendiente | `v1.0.0` | | |
@@ -100,9 +100,10 @@ Otros: RNF-34 `app_config` (T1) · RNF-42 términos y privacidad (T1) · RNF-01 
 | D1 | RF-29: recibo automático (trigger) o manual (create_invoice como en la app) | Pendiente | | |
 | D2 | Matriz: ¿admin bloqueado para asignar paquetes nuevos? | Pendiente | | |
 | D3 | Tasa y cálculo del impuesto (`tax_amount`) | Pendiente | | |
-| D4 | Nombre visible: "Semtracar" o "Nica Cargo Xpress" | Pendiente | | |
+| D4 | Nombre visible: "Semtracar" o "Nica Cargo Xpress" | Resuelta | Siempre **SEMTRACAR** (logo naranja + azul). No se usa la marca ni el logo de Nica Cargo Xpress | Juan · 30-oct-2026 |
 | D5 | Diseño de la tabla `notifications` y eventos que la alimentan | Pendiente | | |
-| D6 | ¿Proyecto Supabase separado para desarrollo? | Pendiente | | |
+| D6 | ¿Proyecto Supabase separado para desarrollo? | Resuelta | No se crea otro proyecto en la nube. Las migraciones se prueban en Supabase local (Docker: `supabase start` + `supabase db reset`) antes de que Juan haga `supabase db push` al proyecto real `cargo-express3` | Juan · 30-oct-2026 |
+| D7 | Mapa "Ubicación del paquete" de la referencia visual | Resuelta | Sin mapa embebido: se muestra la dirección de la sucursal y un botón "Cómo llegar" que abre Google Maps en otra pestaña. Sin librería de mapas | Juan · 30-oct-2026 |
 
 ## Migraciones aplicadas
 | Archivo | Turno | Qué hace | ¿Aplicada en producción? |
