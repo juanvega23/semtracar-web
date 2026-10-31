@@ -1,7 +1,7 @@
 # ESTADO del proyecto — Semtracar Web
 
 > Memoria del proyecto entre turnos. **La IA lo lee completo al iniciar y lo actualiza al cerrar cada turno**
-> (brief §7.3 y §7.4). Manda sobre el brief en cuanto a avance y decisiones.
+> (ver `AGENTS.md`). Manda sobre el brief en cuanto a avance y decisiones; el flujo de Git es el de D8.
 
 ## Turno actual
 **T1 · Juan**. Estado: En curso
@@ -10,7 +10,7 @@ Siguiente: T2 · Daviana
 ## Turnos
 | Turno | Integrante | Alcance | Estado | Tag | Inicio | Cierre |
 |---|---|---|---|---|---|---|
-| T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features, Issues | En curso | `turno-1-juan` | 30-oct-2026 | |
+| T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features | En curso | `turno-1-juan` | 30-oct-2026 | |
 | T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Pendiente | `turno-2-daviana` | | |
 | T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | Pendiente | `turno-3-alberto` | | |
 | T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | Pendiente | `v1.0.0` | | |
@@ -20,7 +20,7 @@ Estados de turno: Pendiente · En curso · Cerrado
 ## Requerimientos funcionales
 Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcance
 
-| RF | Descripción corta | Turno | Estado | Issue / notas |
+| RF | Descripción corta | Turno | Estado | Notas |
 |---|---|---|---|---|
 | RF-01 | Registro (nombre, apellido, correo, contraseña, dirección, teléfono) | T1 | Pendiente | |
 | RF-02 | Validar correo no registrado | T1 | Pendiente | |
@@ -104,6 +104,7 @@ Otros: RNF-34 `app_config` (T1) · RNF-42 términos y privacidad (T1) · RNF-01 
 | D5 | Diseño de la tabla `notifications` y eventos que la alimentan | Pendiente | | |
 | D6 | ¿Proyecto Supabase separado para desarrollo? | Resuelta | No se crea otro proyecto en la nube. Las migraciones se prueban en Supabase local (Docker: `supabase start` + `supabase db reset`) antes de que Juan haga `supabase db push` al proyecto real `cargo-express3` | Juan · 30-oct-2026 |
 | D7 | Mapa "Ubicación del paquete" de la referencia visual | Resuelta | Sin mapa embebido: se muestra la dirección de la sucursal y un botón "Cómo llegar" que abre Google Maps en otra pestaña. Sin librería de mapas | Juan · 30-oct-2026 |
+| D8 | Flujo de Git (reemplaza brief §7.3–7.4 y §8.2–8.6 en lo que toca a GitHub) | Resuelta | Commits directo a `main`, con `git pull` antes de empezar y verificaciones en verde antes de `git push`. **Sin** Pull Requests, Issues, milestones, etiquetas, tablero ni protección de `main`, y sin asignar ni mencionar a nadie en GitHub. Se mantienen los tags `turno-N-nombre`. Detalle en `AGENTS.md` → "Git" | Juan · 30-oct-2026 |
 
 ## Migraciones aplicadas
 | Archivo | Turno | Qué hace | ¿Aplicada en producción? |
@@ -116,7 +117,7 @@ Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
 <!-- PLANTILLA
 ### TN · Nombre (fecha inicio → fecha cierre)
 **Hecho:** RF-xx, RF-yy…
-**Parcial / no hecho:** RF-zz (motivo, Issue #n)
+**Parcial / no hecho:** RF-zz (motivo y qué falta)
 **Archivos y servicios clave:** ruta → para qué sirve
 **Decisiones tomadas:** D# → resolución
 **Desviaciones del brief:** …
@@ -128,5 +129,5 @@ Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
 ### T0 · Planificación, Juan (30-oct-2026)
 **Hecho:** brief v1.1 (`docs/brief-semtracar-web.pdf`), `AGENTS.md`, `CLAUDE.md` y este archivo.
 **Notas para el siguiente (T1 · Juan):** el repo está vacío salvo estos documentos. Empezar por la base del proyecto
-(brief §7.2, fila T1), luego `supabase db pull` y los tipos generados, y crear todos los Issues con milestones `T1 · Juan`,
-`T2 · Daviana`, `T3 · Alberto` y `T4 · Juan`.
+(brief §7.2, fila T1), luego `supabase db pull` y los tipos generados. ~~Crear todos los Issues con milestones~~
+(anulado por D8: no se usan Issues ni PR).
