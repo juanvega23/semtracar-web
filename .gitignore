@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Código de la app móvil Flutter: solo referencia local, NUNCA se sube
+/Nica Cargo Xpress V2 FINAL/
