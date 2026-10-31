@@ -1,0 +1,1 @@
+export { paquetesRoutes } from './routes';

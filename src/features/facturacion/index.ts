@@ -1,0 +1,1 @@
+export { facturacionRoutes } from './routes';

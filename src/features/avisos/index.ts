@@ -1,0 +1,1 @@
+export { avisosRoutes } from './routes';

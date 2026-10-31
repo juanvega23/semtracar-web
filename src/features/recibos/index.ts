@@ -1,0 +1,1 @@
+export { recibosRoutes } from './routes';
