@@ -71,6 +71,26 @@ supabase gen types typescript --linked > src/types/database.ts   # regenerar tip
 ```
 Al subir a `main`, GitHub Actions corre las mismas verificaciones (pestaña Actions).
 
+### Probar sin tocar producción (Supabase local, D6)
+Requiere Docker Desktop abierto.
+```bash
+supabase start            # levanta la base local con todas las migraciones
+supabase db reset         # la reinicia desde cero (borra los datos locales)
+supabase status -o env    # muestra API_URL y ANON_KEY locales
+```
+Para que la web use la base local, crea `.env.development.local` (no se sube) con `VITE_SUPABASE_URL` y
+`VITE_SUPABASE_ANON_KEY` de `supabase status`; bórralo para volver a producción.
+- **Nunca** ejecutes `supabase config push`: sobrescribiría la configuración de Auth de producción.
+- `supabase db push` y `supabase migration repair` solo los ejecuta Juan.
+
+### Qué reutilizar (lo dejó T1)
+- `@/components/ui`: botones, campos, tarjetas, badge, tabla, modal, toast y estados de carga/vacío/error/candado.
+- `@/lib/format`: `formatUSD`, `formatDate`, `formatDateTime`, `formatInvoiceNumber` (fechas en Managua).
+- `@/lib/appConfig`: `useAppConfig()` para tarifas, multiplicadores y costo de delivery.
+- `@/lib/errors`: `toUserMessage(error)` para mostrar errores en español.
+- `@/features/acceso`: `useRequiredCurrentUser()` (usuario y rol), `RequireAccess` y la matriz en `roles.ts`.
+- `@/features/perfil`: `updateProfile()` para guardar dirección y teléfono antes del delivery (RF-50).
+
 ## Antes de cada `git push`
 lint + typecheck + test + build en verde, probado con cada rol afectado, estados de carga/vacío/error en español
 y sin `console.log` con datos personales.
