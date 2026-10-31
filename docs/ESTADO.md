@@ -4,13 +4,13 @@
 > (ver `AGENTS.md`). Manda sobre el brief en cuanto a avance y decisiones; el flujo de Git es el de D8.
 
 ## Turno actual
-**T1 · Juan**. Estado: En curso
-Siguiente: T2 · Daviana
+**T2 · Daviana**. Estado: Pendiente (T1 cerrado el 31-oct-2026)
+Siguiente: T3 · Alberto
 
 ## Turnos
 | Turno | Integrante | Alcance | Estado | Tag | Inicio | Cierre |
 |---|---|---|---|---|---|---|
-| T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features | En curso | `turno-1-juan` | 30-oct-2026 | |
+| T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features | Cerrado | `turno-1-juan` | 30-oct-2026 | 31-oct-2026 |
 | T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Pendiente | `turno-2-daviana` | | |
 | T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | Pendiente | `turno-3-alberto` | | |
 | T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | Pendiente | `v1.0.0` | | |
@@ -27,7 +27,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-03 | Validar nombre + apellido no duplicado | T1 | Hecho | RPC `is_name_registered` (también al editar perfil) |
 | RF-04 | Casillero único automático | T1 | Hecho | Lo asigna la BD: trigger `handle_new_user` → `NCX-` + 6 caracteres del id |
 | RF-05 | Login con sesión persistente | T1 | Hecho | supabase-js persiste la sesión; `SessionProvider` |
-| RF-06 | Recuperar contraseña por correo | T1 | Parcial | Código listo. **Falta** agregar las URLs de la web en Supabase → Auth → URL Configuration |
+| RF-06 | Recuperar contraseña por correo | T1 | Hecho | Redirección a `/reset-password`. Producción permite `http://localhost:5173/**` (Auth → URL Configuration); al publicar la web hay que agregar su dominio |
 | RF-07 | Cerrar sesión desde cualquier pantalla | T1 | Hecho | Menú de usuario (escritorio y móvil) |
 | RF-08 | Ver/editar perfil y ver casillero | T1 | Hecho | `features/perfil`. El correo no se edita desde la web |
 | RF-09 | Redirigir por rol (repartidor → "Tu rol usa la aplicación móvil" + signOut) | T1 | Hecho | `/app-movil` cierra la sesión |
@@ -107,6 +107,7 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | D8 | Flujo de Git (reemplaza brief §7.3–7.4 y §8.2–8.6 en lo que toca a GitHub) | Resuelta | Commits directo a `main`, con `git pull` antes de empezar y verificaciones en verde antes de `git push`. **Sin** Pull Requests, Issues, milestones, etiquetas, tablero ni protección de `main`, y sin asignar ni mencionar a nadie en GitHub. Se mantienen los tags `turno-N-nombre`. Detalle en `AGENTS.md` → "Git" | Juan · 30-oct-2026 |
 | D9 | Qué ve el encargado de almacén en el menú (brief §2 y §5.1 no lo cubren todo) | Resuelta | Paquetes: entra. Facturación y Pedidos: visibles con candado. Retiro, Dashboard y Usuarios: ocultos. Se cambia en `features/acceso/roles.ts` | Juan · 30-oct-2026 |
 | D10 | Menú y rutas del cliente | Resuelta | Como la referencia visual: Rastreo (`/rastreo`), Historial = recibos (`/historial`), Delivery (`/delivery`), Cotizar (`/cotizar`). Avisos en la campana (`/avisos`) y perfil en el menú de usuario | Juan · 30-oct-2026 |
+| D11 | Publicación de la web (Vercel) | Resuelta | Se pospone: por ahora la web solo corre en local (`npm run dev`). `vercel.json` ya está listo. Al publicar: importar el repo, poner `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` y agregar el dominio en las Redirect URLs de Supabase | Juan · 31-oct-2026 |
 
 ## Migraciones aplicadas
 | Archivo | Turno | Qué hace | ¿Aplicada en producción? |
@@ -135,6 +136,37 @@ Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
 **Problemas conocidos:** …
 **Notas para el siguiente:** qué necesita saber, por dónde empezar, qué reutilizar
 -->
+
+### T1 · Juan (30-oct-2026 → 31-oct-2026)
+**Hecho:** base del proyecto (Vite + React + TS, Tailwind, ESLint, Prettier, Vitest, CI en GitHub Actions),
+RF-01 a RF-10, RF-60 a RF-62, RF-64, RF-66, RF-68, RNF-34 (`app_config`), RNF-42 (términos y privacidad) y el
+esqueleto de todas las features con página "Próximamente".
+**Parcial / no hecho:** RF-65: T1 hizo el menú por rol (D9); las restricciones dentro de Paquetes son de T2 (con RF-67).
+**Archivos y servicios clave:**
+- `src/components/ui` → componentes base (ver `AGENTS.md` → "Qué reutilizar"). Úsalos en vez de crear otros.
+- `src/lib/format.ts` (USD, fechas en Managua, `REC-00000`), `src/lib/errors.ts`, `src/lib/appConfig.ts`.
+- `src/features/acceso/roles.ts` → roles, matriz `ACCESS` y página de inicio por rol. `RequireAccess section="…"` protege cada ruta.
+- `src/app/routes.tsx` → router central; cada feature aporta su `routes.tsx` y su entrada en `src/app/navigation.ts`.
+- `src/features/usuarios/services/usersService.ts` → ejemplo de servicio con búsqueda y paginación en servidor.
+**Decisiones tomadas:** D4, D6, D7, D8, D9, D10 y D11.
+**Desviaciones del brief:** flujo de Git sin PR ni Issues (D8). Sin publicar en Vercel por ahora (D11).
+**Migraciones:** 6 (ver "Migraciones aplicadas"). La más importante cierra una escalada de privilegios: antes cualquier
+cliente podía ponerse `is_admin = true` desde la API. Ahora un trigger lo impide (solo admins o SQL del panel).
+**Problemas conocidos:**
+- Realtime en producción solo publica `users` e `invoices`. Para ver cambios de `packages`, `package_status_history`
+  o `deliveries` en vivo hace falta una migración que los agregue a `supabase_realtime` (revisa Juan).
+- Las RLS no dejan que un admin edite a otros usuarios directamente: para eso existen RPC (`set_user_role`,
+  `promote_to_repartidor`). Si una pantalla necesita escribir algo que la RLS no permite, pedir una RPC a Juan.
+- Los textos de `/terminos` y `/privacidad` son una base; la empresa debe revisarlos.
+- `20261030000000_remote_schema.sql` tiene secretos reemplazados por marcadores: **nunca** aplicarla en producción.
+**Notas para el siguiente (T2 · Daviana):**
+- Antes de programar, resolver con Juan D1 (recibo automático o manual), D2 (admin y paquetes nuevos) y D3 (impuesto).
+- Paquetes, Facturación y Retiro ya tienen ruta, menú y candado; reemplaza la página "Próximamente" de cada feature.
+- Modo almacén: `useRequiredCurrentUser()` da el rol; la matriz está en `roles.ts` (D9). RF-18: excluir a almacén y
+  repartidor del buscador de clientes.
+- Usa siempre los tipos de `src/types/database.ts` y las RPC existentes (`create_invoice`, `register_payment`).
+- Prueba en Supabase local (D6): `supabase start`, crea `.env.development.local` y regístrate en la web local (no pide
+  confirmar correo). Para volver admin a una cuenta local, actualiza `users.is_admin` con SQL en la base local.
 
 ### T0 · Planificación, Juan (30-oct-2026)
 **Hecho:** brief v1.1 (`docs/brief-semtracar-web.pdf`), `AGENTS.md`, `CLAUDE.md` y este archivo.
