@@ -22,19 +22,19 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 
 | RF | Descripción corta | Turno | Estado | Notas |
 |---|---|---|---|---|
-| RF-01 | Registro (nombre, apellido, correo, contraseña, dirección, teléfono) | T1 | Pendiente | |
-| RF-02 | Validar correo no registrado | T1 | Pendiente | |
-| RF-03 | Validar nombre + apellido no duplicado | T1 | Pendiente | |
-| RF-04 | Casillero único automático | T1 | Pendiente | Verificar cómo lo asigna la BD |
-| RF-05 | Login con sesión persistente | T1 | Pendiente | |
-| RF-06 | Recuperar contraseña por correo | T1 | Pendiente | Agregar URLs web en Auth → Redirect URLs |
-| RF-07 | Cerrar sesión desde cualquier pantalla | T1 | Pendiente | |
-| RF-08 | Ver/editar perfil y ver casillero | T1 | Pendiente | |
-| RF-09 | Redirigir por rol (repartidor → "Tu rol usa la aplicación móvil" + signOut) | T1 | Pendiente | |
-| RF-10 | Cambio de rol en tiempo real sin cerrar sesión | T1 | Pendiente | |
+| RF-01 | Registro (nombre, apellido, correo, contraseña, dirección, teléfono) | T1 | Hecho | `features/auth` → RegisterPage |
+| RF-02 | Validar correo no registrado | T1 | Hecho | RPC `is_email_registered` + identidades vacías de signUp |
+| RF-03 | Validar nombre + apellido no duplicado | T1 | Hecho | RPC `is_name_registered` (también al editar perfil) |
+| RF-04 | Casillero único automático | T1 | Hecho | Lo asigna la BD: trigger `handle_new_user` → `NCX-` + 6 caracteres del id |
+| RF-05 | Login con sesión persistente | T1 | Hecho | supabase-js persiste la sesión; `SessionProvider` |
+| RF-06 | Recuperar contraseña por correo | T1 | Parcial | Código listo. **Falta** agregar las URLs de la web en Supabase → Auth → URL Configuration |
+| RF-07 | Cerrar sesión desde cualquier pantalla | T1 | Hecho | Menú de usuario (escritorio y móvil) |
+| RF-08 | Ver/editar perfil y ver casillero | T1 | Hecho | `features/perfil`. El correo no se edita desde la web |
+| RF-09 | Redirigir por rol (repartidor → "Tu rol usa la aplicación móvil" + signOut) | T1 | Hecho | `/app-movil` cierra la sesión |
+| RF-10 | Cambio de rol en tiempo real sin cerrar sesión | T1 | Hecho | Realtime sobre `users` (`useCurrentUserRealtime`) |
 | RF-11 | Calcular costo estimado de envío | T3 | Pendiente | |
-| RF-12 | Tarifas base (aéreo 6.50, marítimo 3.50) | T3 | Pendiente | Leer de `app_config` (creada en T1) |
-| RF-13 | Multiplicadores por categoría | T3 | Pendiente | Leer de `app_config` |
+| RF-12 | Tarifas base (aéreo 6.50, marítimo 3.50) | T3 | Pendiente | Leer con `useAppConfig()` de `src/lib/appConfig.ts` |
+| RF-13 | Multiplicadores por categoría | T3 | Pendiente | Leer con `useAppConfig()` de `src/lib/appConfig.ts` |
 | RF-14 | Validar peso (> 0, ≤ 1000, decimal) | T3 | Pendiente | |
 | RF-15 | Mostrar desglose y total | T3 | Pendiente | |
 | RF-16 | Registrar paquete asignado a cliente | T2 | Pendiente | Ver decisión D2 |
@@ -45,7 +45,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-21 | 4 estados (Recibido, En tránsito, En aduana, Listo para recoger) | T2 | Pendiente | |
 | RF-22 | Historial de estados cronológico e inmutable | T2 | Pendiente | |
 | RF-23 | Marcar pagado / no pagado | T2 | Pendiente | |
-| RF-24 | Cliente ve solo sus paquetes | T3 | Pendiente | |
+| RF-24 | Cliente ve solo sus paquetes | T3 | Pendiente | Realtime: hoy solo `users` e `invoices` emiten cambios (ver Notas del T1) |
 | RF-25 | Buscar paquete por código | T3 | Pendiente | |
 | RF-26 | Línea de tiempo visual | T3 | Pendiente | |
 | RF-27 | Fechas en hora local | T3 | Pendiente | |
@@ -54,7 +54,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-30 | Recibo + ítems en una transacción | T2 | Pendiente | RPC `create_invoice` |
 | RF-31 | Número correlativo REC-00000 | T2 | Pendiente | |
 | RF-32 | Subtotal, impuesto, delivery y total | T2 | Pendiente | Ver decisión D3 |
-| RF-33 | Sumar delivery ($3.58) al solicitarlo | T3 | Pendiente | Lo aplica la solicitud de delivery |
+| RF-33 | Sumar delivery ($3.58) al solicitarlo | T3 | Pendiente | Lo aplica la solicitud de delivery. Monto: `useAppConfig().deliveryCost` |
 | RF-34 | Pagos totales o parciales | T2 | Pendiente | RPC `register_payment` |
 | RF-35 | 5 métodos de pago | T2 | Pendiente | |
 | RF-36 | Saldo pendiente | T2 | Pendiente | |
@@ -71,7 +71,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-47 | Solicitar delivery de un recibo | T3 | Pendiente | + push a repartidores |
 | RF-48 | Delivery de varios paquetes en un pedido | T3 | Pendiente | + push a repartidores |
 | RF-49 | Rechazar delivery (retiro en sucursal por defecto) | T3 | Pendiente | |
-| RF-50 | Guardar dirección y teléfono en el perfil | T3 | Pendiente | |
+| RF-50 | Guardar dirección y teléfono en el perfil | T3 | Pendiente | Reutilizar `updateProfile` de `@/features/perfil` |
 | RF-51 | Estado del pedido, horas y repartidor asignado | T3 | Pendiente | Sin mapa (fuera de alcance) |
 | RF-52 | Admin ve pedidos y repartidor | T3 | Pendiente | |
 | RF-53 | Admin cancela pedido | T3 | Pendiente | |
@@ -81,17 +81,17 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-57 | Marcar avisos como leídos e historial | T4 | Pendiente | |
 | RF-58 | Dashboard de indicadores | T4 | Pendiente | |
 | RF-59 | Reporte de entregas por repartidor | T4 | Pendiente | |
-| RF-60 | Listar, buscar y consultar usuarios | T1 | Pendiente | |
-| RF-61 | Promover cliente a repartidor | T1 | Pendiente | RPC `promote_to_repartidor` |
-| RF-62 | Asignar rol almacén | T1 | Pendiente | |
+| RF-60 | Listar, buscar y consultar usuarios | T1 | Hecho | `features/usuarios`, búsqueda y paginación en servidor |
+| RF-61 | Promover cliente a repartidor | T1 | Hecho | RPC `promote_to_repartidor` |
+| RF-62 | Asignar rol almacén | T1 | Hecho | RPC nueva `set_user_role` (cliente ↔ almacén) |
 | RF-63 | Exportar CSV (paquetes, recibos, pedidos) | T2 / T3 | Pendiente | T2 crea `lib/csv.ts` + paquetes y recibos; T3 pedidos |
-| RF-64 | RBAC: cliente, repartidor, almacén, admin | T1 | Pendiente | |
-| RF-65 | Restricciones del encargado de almacén | T1 / T2 | Pendiente | T1 en navegación, T2 en paquetes |
-| RF-66 | Candado en secciones no autorizadas | T1 | Pendiente | |
+| RF-64 | RBAC: cliente, repartidor, almacén, admin | T1 | Hecho | `features/acceso/roles.ts` (misma prioridad de roles que la app móvil) |
+| RF-65 | Restricciones del encargado de almacén | T1 / T2 | Parcial | T1 hecho: navegación (D9). T2: restricciones dentro de paquetes |
+| RF-66 | Candado en secciones no autorizadas | T1 | Hecho | `RequireAccess` + candado en el menú |
 | RF-67 | Almacén ve solo paquetes y estados permitidos | T2 | Pendiente | |
-| RF-68 | Rutas protegidas por rol | T1 | Pendiente | |
+| RF-68 | Rutas protegidas por rol | T1 | Hecho | `RequireAuth` + `RequireAccess` en cada `routes.tsx` |
 
-Otros: RNF-34 `app_config` (T1) · RNF-42 términos y privacidad (T1) · RNF-01 pruebas de RLS (T4) · RNF-20 navegadores (T4)
+Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RNF-42 términos y privacidad (T1, **Hecho**: texto base en `/terminos` y `/privacidad`; la empresa debe revisarlo) · RNF-01 pruebas de RLS (T4) · RNF-20 navegadores (T4)
 
 ## Decisiones
 | ID | Tema | Estado | Resolución | Quién / fecha |
@@ -105,6 +105,8 @@ Otros: RNF-34 `app_config` (T1) · RNF-42 términos y privacidad (T1) · RNF-01 
 | D6 | ¿Proyecto Supabase separado para desarrollo? | Resuelta | No se crea otro proyecto en la nube. Las migraciones se prueban en Supabase local (Docker: `supabase start` + `supabase db reset`) antes de que Juan haga `supabase db push` al proyecto real `cargo-express3` | Juan · 30-oct-2026 |
 | D7 | Mapa "Ubicación del paquete" de la referencia visual | Resuelta | Sin mapa embebido: se muestra la dirección de la sucursal y un botón "Cómo llegar" que abre Google Maps en otra pestaña. Sin librería de mapas | Juan · 30-oct-2026 |
 | D8 | Flujo de Git (reemplaza brief §7.3–7.4 y §8.2–8.6 en lo que toca a GitHub) | Resuelta | Commits directo a `main`, con `git pull` antes de empezar y verificaciones en verde antes de `git push`. **Sin** Pull Requests, Issues, milestones, etiquetas, tablero ni protección de `main`, y sin asignar ni mencionar a nadie en GitHub. Se mantienen los tags `turno-N-nombre`. Detalle en `AGENTS.md` → "Git" | Juan · 30-oct-2026 |
+| D9 | Qué ve el encargado de almacén en el menú (brief §2 y §5.1 no lo cubren todo) | Resuelta | Paquetes: entra. Facturación y Pedidos: visibles con candado. Retiro, Dashboard y Usuarios: ocultos. Se cambia en `features/acceso/roles.ts` | Juan · 30-oct-2026 |
+| D10 | Menú y rutas del cliente | Resuelta | Como la referencia visual: Rastreo (`/rastreo`), Historial = recibos (`/historial`), Delivery (`/delivery`), Cotizar (`/cotizar`). Avisos en la campana (`/avisos`) y perfil en el menú de usuario | Juan · 30-oct-2026 |
 
 ## Migraciones aplicadas
 | Archivo | Turno | Qué hace | ¿Aplicada en producción? |
