@@ -80,6 +80,10 @@ supabase status -o env    # muestra API_URL y ANON_KEY locales
 ```
 Para que la web use la base local, crea `.env.development.local` (no se sube) con `VITE_SUPABASE_URL` y
 `VITE_SUPABASE_ANON_KEY` de `supabase status`; bórralo para volver a producción.
+- `supabase/seed.sql` crea en local 4 cuentas con contraseña `Prueba1234`: `cliente@`, `admin@`, `almacen@` y
+  `repartidor@prueba.local`. Solo existen en Docker; `db push` no sube el seed.
+- El seed desactiva **solo en local** el trigger de push `on_package_status_insert` (apunta a producción y necesita
+  `pg_net`, que no existe en local). Por eso en local no se envían notificaciones.
 - **Nunca** ejecutes `supabase config push`: sobrescribiría la configuración de Auth de producción.
 - `supabase db push` y `supabase migration repair` solo los ejecuta Juan.
 
