@@ -1,12 +1,14 @@
-import { ComingSoon } from '@/components/ui';
+import { PageHeader } from '@/components/ui';
+import { OrdersList } from '../components/OrdersList';
 
 export function PedidosAdminPage() {
   return (
-    <ComingSoon
-      title="Pedidos"
-      description="Pedidos de delivery con su repartidor."
-      owner="T3 · Alberto"
-      requirements="RF-52, RF-53, RF-63"
-    />
+    <>
+      <PageHeader
+        title="Pedidos"
+        description="Consulta las entregas, sus repartidores y el estado de cada pedido."
+      />
+      <OrdersList admin />
+    </>
   );
 }
