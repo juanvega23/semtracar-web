@@ -4,18 +4,15 @@
 > (ver `AGENTS.md`). Manda sobre el brief en cuanto a avance y decisiones; el flujo de Git es el de D8.
 
 ## Turno actual
-**T3 · Alberto**. Estado: En curso (T2 cerrado el 31-oct-2026).
-Alberto autorizó implementar T3 el 1-nov-2026 y pidió dejar los cambios locales, sin commits, tags ni push,
-para que Juan los revise antes de cerrar el turno.
-Implementación terminada en local; revisión de Juan y validación del push real pendientes. Ver `docs/REVISION-T3.md`.
-Siguiente: T4 · Juan (cierre)
+**T4 · Juan**. Estado: Pendiente (T3 cerrado el 1-nov-2026)
+Siguiente: cierre del proyecto (`v1.0.0`)
 
 ## Turnos
 | Turno | Integrante | Alcance | Estado | Tag | Inicio | Cierre |
 |---|---|---|---|---|---|---|
 | T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features | Cerrado | `turno-1-juan` | 30-oct-2026 | 31-oct-2026 |
 | T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Cerrado | `turno-2-daviana` | 31-oct-2026 | 31-oct-2026 |
-| T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | En curso | Pendiente de revisión | 1-nov-2026 | |
+| T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | Cerrado | `turno-3-alberto` | 1-nov-2026 | 1-nov-2026 |
 | T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | Pendiente | `v1.0.0` | | |
 
 Estados de turno: Pendiente · En curso · Cerrado
@@ -48,7 +45,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-21 | 4 estados (Recibido, En tránsito, En aduana, Listo para recoger) | T2 | Hecho | Catálogo `status_types`; solo avanza de uno en uno |
 | RF-22 | Historial de estados cronológico e inmutable | T2 | Hecho | La web solo inserta. Ojo: la RLS deja a un admin editar o borrar historial (ver problemas conocidos del T2) |
 | RF-23 | Marcar pagado / no pagado | T2 | Hecho | Automático como en la app: `register_payment` marca `is_paid` al quedar pagado y anular lo revierte. Sin interruptor manual |
-| RF-24 | Cliente ve solo sus paquetes | T3 | Hecho | Filtro por usuario + RLS probada en local. Realtime y respaldo cada 30 s; publicación pendiente en producción |
+| RF-24 | Cliente ve solo sus paquetes | T3 | Hecho | Filtro por usuario + RLS probada en local. Realtime (publicado en producción el 1-nov-2026) y respaldo cada 30 s |
 | RF-25 | Buscar paquete por código | T3 | Hecho | Búsqueda y paginación en servidor entre paquetes propios |
 | RF-26 | Línea de tiempo visual | T3 | Hecho | Historial cronológico, ubicación y estado actual del catálogo |
 | RF-27 | Fechas en hora local | T3 | Hecho | `formatDateTime` en America/Managua |
@@ -57,7 +54,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-30 | Recibo + ítems en una transacción | T2 | Hecho | `transition_package_ready` llama a `create_invoice` e inserta el estado 4 en la misma transacción |
 | RF-31 | Número correlativo REC-00000 | T2 | Hecho | `formatInvoiceNumber` |
 | RF-32 | Subtotal, impuesto, delivery y total | T2 | Hecho | D3. El detalle muestra subtotal, impuesto, delivery (si lo tiene) y total |
-| RF-33 | Sumar delivery ($3.58) al solicitarlo | T3 | Hecho | UI y RPC leen app_config; un cargo por pedido. Propuesta probada solo en local, pendiente de Juan |
+| RF-33 | Sumar delivery ($3.58) al solicitarlo | T3 | Hecho | UI y RPC leen app_config; un cargo por pedido. En producción desde el 1-nov-2026 |
 | RF-34 | Pagos totales o parciales | T2 | Hecho | RPC `register_payment`; montos en centavos para evitar errores de redondeo |
 | RF-35 | 5 métodos de pago | T2 | Parcial | La BD solo acepta 4 métodos (efectivo, transferencia, tarjeta_datafono, tarjeta_online). "Contra entrega" lo cobra el repartidor en la app |
 | RF-36 | Saldo pendiente | T2 | Hecho | Total − pagos, en Facturación y Retiro |
@@ -71,13 +68,13 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-44 | Mostrar cliente y estado de pago al validar | T2 | Hecho | Muestra cliente, casillero, pagos y saldo |
 | RF-45 | Cobrar saldo antes de autorizar el retiro | T2 | Hecho | Cobro con el mismo modal de Facturación (solo admin) |
 | RF-46 | Rechazar recibos inexistentes | T2 | Hecho | Recibo inexistente → mensaje; recibo anulado → no autoriza el retiro |
-| RF-47 | Solicitar delivery de un recibo | T3 | Hecho | RPC + invocación send-push-notification. Pruebas locales y mock del push; falta validar recepción real con Juan |
+| RF-47 | Solicitar delivery de un recibo | T3 | Hecho | RPC + invocación send-push-notification. Pruebas locales y mock del push; falta validar la recepción real en la app del repartidor (T4) |
 | RF-48 | Delivery de varios paquetes en un pedido | T3 | Hecho | Recibos completos sin pagos, un cargo, secundarios anulados (D12). Push como RF-47 |
 | RF-49 | Rechazar delivery (retiro en sucursal por defecto) | T3 | Hecho | `decline_delivery`, sin modificar importes; protege recibos ya solicitados/anulados |
 | RF-50 | Guardar dirección y teléfono en el perfil | T3 | Hecho | `updateProfile` antes de pedir delivery; dirección y teléfono normalizados/validados |
 | RF-51 | Estado del pedido, horas y repartidor asignado | T3 | Hecho | Pedido, repartidor, horas, dirección y paquetes; sin mapa. Realtime + respaldo 30 s |
 | RF-52 | Admin ve pedidos y repartidor | T3 | Hecho | Listado paginado por estado, cliente, contacto y repartidor |
-| RF-53 | Admin cancela pedido | T3 | Hecho | Nueva RPC atómica: quita el cargo sin pagos; con pagos exige revisión (D13). Pendiente de Juan en producción |
+| RF-53 | Admin cancela pedido | T3 | Hecho | Nueva RPC atómica: quita el cargo sin pagos; con pagos exige revisión (D13). En producción desde el 1-nov-2026 |
 | RF-54 | Centro de avisos con contador | T4 | Pendiente | Tabla `notifications` (D5) |
 | RF-55 | Avisos en tiempo real | T4 | Pendiente | |
 | RF-56 | Correos ante eventos críticos | T4 | Pendiente | Edge Function |
@@ -111,8 +108,8 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | D9 | Qué ve el encargado de almacén en el menú (brief §2 y §5.1 no lo cubren todo) | Resuelta | Paquetes: entra. Facturación y Pedidos: visibles con candado. Retiro, Dashboard y Usuarios: ocultos. Se cambia en `features/acceso/roles.ts` | Juan · 30-oct-2026 |
 | D10 | Menú y rutas del cliente | Resuelta | Como la referencia visual: Rastreo (`/rastreo`), Historial = recibos (`/historial`), Delivery (`/delivery`), Cotizar (`/cotizar`). Avisos en la campana (`/avisos`) y perfil en el menú de usuario | Juan · 30-oct-2026 |
 | D11 | Publicación de la web (Vercel) | Resuelta | Se pospone: por ahora la web solo corre en local (`npm run dev`). `vercel.json` ya está listo. Al publicar: importar el repo, poner `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` y agregar el dominio en las Redirect URLs de Supabase | Juan · 31-oct-2026 |
-| D12 | Consolidación de recibos para delivery múltiple | Resuelta | Solo recibos sin pagos y todos sus paquetes. Mover los ítems originales al principal para mantener una sola fila por paquete, compatible con `maybeSingle` móvil. Conservar los secundarios anulados con su número, importes y nota; no borrar recibos ni pagos. Pendiente de revisión de la migración por Juan | Alberto · 1-nov-2026, ajustada tras revisión de compatibilidad móvil |
-| D13 | Cargo al cancelar delivery | Resuelta | Sin pagos: cancelar pedido y quitar delivery del recibo en una transacción. El paquete queda para retiro en sucursal y no puede volver a solicitar delivery, ni simple ni múltiple. Con cualquier pago: bloquear la cancelación automática y exigir revisión administrativa | Alberto · 1-nov-2026, aclarada tras revisión de compatibilidad móvil |
+| D12 | Consolidación de recibos para delivery múltiple | Resuelta | Solo recibos sin pagos y todos sus paquetes. Mover los ítems originales al principal para mantener una sola fila por paquete, compatible con `maybeSingle` móvil. Conservar los secundarios anulados con su número, importes y nota; no borrar recibos ni pagos. | Alberto, aprobada por Juan · 1-nov-2026 |
+| D13 | Cargo al cancelar delivery | Resuelta | Sin pagos: cancelar pedido y quitar delivery del recibo en una transacción. El paquete queda para retiro en sucursal y no puede volver a solicitar delivery, ni simple ni múltiple. Con cualquier pago: bloquear la cancelación automática y exigir revisión administrativa | Alberto, aprobada por Juan · 1-nov-2026 |
 
 ## Migraciones aplicadas
 | Archivo | Turno | Qué hace | ¿Aplicada en producción? |
@@ -125,15 +122,14 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | `20261030010200_app_config.sql` | T1 | Tabla `app_config` con tarifas, multiplicadores y delivery (RNF-34) | Sí, 30-oct-2026 |
 | `20261101010445_transition_package_ready.sql` | T2 | RPC `transition_package_ready` (D1, RF-29/30/39): estado 4 + recibo en una transacción, con bloqueo contra recibos dobles. Solo admin | Sí, 31-oct-2026 |
 | `20261101020000_cancel_invoice_unpaid.sql` | T2 | RPC `cancel_unpaid_invoice` (RF-37): anula un recibo **sin pagos** y revierte `is_paid`. Solo admin | Sí, 31-oct-2026 |
-| `20261101030000_delivery_web.sql` | T3 | Propuesta: pertenencia/estado, costo configurable, mover ítems sin borrar recibos (D12), cancelación atómica sin volver a pedir delivery (D13), protección de rechazo. El teléfono se valida solo en la web | **No.** Probada en Docker; pendiente de revisión y aplicación por Juan |
-| `20261101030100_realtime_t3.sql` | T3 | Publica packages, package_status_history, deliveries, invoice_items y payments, sin cambiar RLS | **No.** Probada en Docker; pendiente de revisión y aplicación por Juan |
+| `20261101030000_delivery_web.sql` | T3 | Pertenencia/estado, costo configurable, mover ítems sin borrar recibos (D12), cancelación atómica sin volver a pedir delivery (D13), protección de rechazo. El teléfono se valida solo en la web | Sí, 1-nov-2026 |
+| `20261101030100_realtime_t3.sql` | T3 | Publica packages, package_status_history, deliveries, invoice_items y payments, sin cambiar RLS | Sí, 1-nov-2026 |
 
 Las de T1 están probadas en Supabase local (`supabase db reset`). Las de T2 las probaron Daviana y Juan en local (9 casos:
 permisos, saltos de estado, recibo doble, anular con pagos, anular dos veces). Solo Juan aplica en producción.
 Después de aplicarlas se regeneró `database.ts` y se quitaron los tipos temporales (`TransactionDatabase`, `as never`).
-T3 regeneró `src/types/database.ts` desde **local** con las propuestas aplicadas (`--local`, CLI 2.122.0), sin editar
-tipos a mano. Incluye `cancel_delivery` y el helper SQL privado. Juan debe regenerarlo con `--linked` tras aprobar y
-aplicar las migraciones; no ejecutar `db push` desde el turno de Alberto.
+Las de T3 las probaron Alberto (44 pruebas pgTAP) y Juan en local, incluida la compatibilidad con las consultas
+`maybeSingle` de la app móvil. Después de aplicarlas, Juan regeneró `database.ts` desde producción (`--linked`).
 
 ## Bitácora de relevos
 Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
@@ -150,13 +146,10 @@ Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
 **Notas para el siguiente:** qué necesita saber, por dónde empezar, qué reutilizar
 -->
 
-### T3 · Alberto (1-nov-2026 · implementación local, pendiente de revisión)
+### T3 · Alberto (1-nov-2026 → 1-nov-2026)
 **Hecho:** RF-11 a RF-15, RF-24 a RF-28, RF-33, RF-38, RF-40 a RF-42, RF-47 a RF-53 y la parte de pedidos de RF-63.
-Se implementaron y probaron en local. El turno **no está Cerrado**: Alberto pidió que Juan revise primero y que no se
-hagan commits, tags ni push.
 **Parcial / no hecho:** no se validó la recepción de push real en la app móvil. La web invoca la Edge Function tras
-crear el pedido; se probó el contrato con mocks y el fallo real de una función no desplegada en Docker. Producción
-no cambió; aplicar la migración revisada antes de usar estas escrituras web contra producción.
+crear el pedido; se probó el contrato con mocks y el fallo real de una función no desplegada en Docker.
 **Archivos y servicios clave:**
 - `features/cotizacion` → validación Zod y cotización con catálogos/tarifas existentes.
 - `features/seguimiento` → paquetes propios paginados, búsqueda e historial visual.
@@ -166,15 +159,14 @@ no cambió; aplicar la migración revisada antes de usar estas escrituras web co
 - `features/pedidos/hooks/useDeliveries.ts` → guarda contacto con `updateProfile`, refresca cachés y evita reintentos de escritura.
 - `lib/liveUpdates.ts` → suscripciones con limpieza; consultas refrescan cada 30 segundos como respaldo.
 - `supabase/tests/t3_delivery.test.sql` → pruebas transaccionales locales de permisos y reglas financieras.
-- `docs/REVISION-T3.md` → pasos de revisión y límites de las verificaciones.
-**Decisiones tomadas:** D12 y D13, confirmadas por Alberto en esta sesión.
+**Decisiones tomadas:** D12 y D13, propuestas por Alberto y aprobadas por Juan.
 **Cambios necesarios de turnos anteriores:** exportaciones públicas de Paquetes; detalle de Facturación con controles
 por rol, lectura de importes actuales, datos del cliente y descargas. No anular desde la UI un recibo con delivery:
-primero se cancela el pedido. No se hicieron commits de estos cambios por instrucción de Alberto.
+primero se cancela el pedido.
 Se ajustó `src/app/layouts/AppLayout.tsx`: usar menú móvil hasta 1280 px evita el desborde del encabezado que se
 detectó en Chrome a 768 px al probar las pantallas T3.
-**Migraciones:** las dos propuestas T3 se probaron con `supabase db reset --local` y pruebas SQL. Solo en Docker;
-**ninguna aplicada en producción**. Se mantienen los nombres, firmas y retornos existentes de las RPC móviles.
+**Migraciones:** las dos propuestas T3 se probaron con `supabase db reset --local` y pruebas SQL. Juan las revisó, las probó
+en local y las aplicó en producción el 1-nov-2026. Se mantienen los nombres, firmas y retornos existentes de las RPC móviles.
 **Corrección de compatibilidad móvil (revisión del 1-nov-2026):** se sustituyó la copia de ítems por su movimiento al
 principal, manteniendo su id. Los recibos secundarios anulados quedan sin ítems y conservan número, importes y nota.
 Se bloquea todo nuevo delivery de un paquete con pedido anterior, incluso cancelado, tanto en SQL como en la selección
@@ -185,18 +177,17 @@ teléfono nulo y formato de teléfono móvil distinto al web.
 Chrome: flujos cliente/admin, PDF y PNG reales, CSV, cancelación bloqueada con pagos, roles y seis pantallas sin
 desborde a 390/768/1440 px. Un pago desde otra sesión se reflejó por Realtime antes del respaldo de 30 s.
 **Problemas conocidos / límites:**
-- Juan debe revisar las migraciones, aplicarlas y regenerar tipos desde producción antes de usar las escrituras web
-  contra producción. No hay interruptor en app_config: las funciones se despliegan como una sola migración.
-- La publicación de Realtime en producción sigue pendiente; las lecturas se actualizan cada 30 s y al volver a la ventana.
 - Las políticas heredadas `repartidores select deliveries` y `auth read delivery_packages` son demasiado amplias para
   clientes autenticados. La web filtra por `client_id`, pero Juan debe revisar el acceso directo a la API en T4. No se
   cambiaron políticas RLS en T3. Revisar también que las RPC operativas móviles respeten los pedidos cancelados.
 - `@react-pdf/renderer` genera un chunk grande; se carga solo al pulsar Descargar PDF. El build pasa con ese aviso.
-**Notas para el siguiente (Juan, revisión y después T4):**
-- Revisar el diff local y `docs/REVISION-T3.md`; no hay commit, push ni tag T3 por petición de Alberto.
-- Validar el push real hacia un repartidor con token antes de dar por verificada la integración móvil.
-- El `.env.development.local` local e ignorado apunta a Docker; `.env.local` no se modificó. Hay fixtures locales de QA.
-- Después de aprobar, completar el cierre T3, actualizar Turno actual a T4 y seguir el flujo Git de D8 con autorización.
+**Cierre:** Alberto subió sus commits a `main`. Juan aplicó las 2 migraciones, regeneró los tipos y cerró el turno a su
+nombre (este archivo, se quitó `docs/REVISION-T3.md`, que era solo la guía de revisión, y tag `turno-3-alberto`).
+**Notas para el siguiente (T4 · Juan):**
+- Validar el push real hacia un repartidor con la app móvil antes de dar por verificada la integración.
+- Si un admin cancela un delivery, el recibo vuelve a aparecer en la app móvil como disponible; al pedirlo, la app
+  muestra "Ya existe un delivery…" (D13: va a retiro en sucursal). Aceptado.
+- Pruebas RLS de T4: `repartidores select deliveries`, `auth read delivery_packages` y la edición del historial de estados.
 
 ### T2 · Daviana (31-oct-2026 → 31-oct-2026)
 **Hecho:** RF-16 a RF-23, RF-29 a RF-32, RF-34, RF-36, RF-39, RF-43 a RF-46, RF-65 y RF-67. De RF-63, la parte de T2
