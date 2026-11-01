@@ -4,14 +4,14 @@
 > (ver `AGENTS.md`). Manda sobre el brief en cuanto a avance y decisiones; el flujo de Git es el de D8.
 
 ## Turno actual
-**T2 · Daviana**. Estado: Pendiente (T1 cerrado el 31-oct-2026)
-Siguiente: T3 · Alberto
+**T3 · Alberto**. Estado: Pendiente (T2 cerrado el 31-oct-2026)
+Siguiente: T4 · Juan (cierre)
 
 ## Turnos
 | Turno | Integrante | Alcance | Estado | Tag | Inicio | Cierre |
 |---|---|---|---|---|---|---|
 | T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features | Cerrado | `turno-1-juan` | 30-oct-2026 | 31-oct-2026 |
-| T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Pendiente | `turno-2-daviana` | | |
+| T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Cerrado | `turno-2-daviana` | 31-oct-2026 | 31-oct-2026 |
 | T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | Pendiente | `turno-3-alberto` | | |
 | T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | Pendiente | `v1.0.0` | | |
 
@@ -37,37 +37,37 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-13 | Multiplicadores por categoría | T3 | Pendiente | Leer con `useAppConfig()` de `src/lib/appConfig.ts` |
 | RF-14 | Validar peso (> 0, ≤ 1000, decimal) | T3 | Pendiente | |
 | RF-15 | Mostrar desglose y total | T3 | Pendiente | |
-| RF-16 | Registrar paquete asignado a cliente | T2 | Pendiente | Ver decisión D2 |
-| RF-17 | Código de rastreo único | T2 | Pendiente | |
-| RF-18 | Excluir almacén/repartidor del buscador de clientes | T2 | Pendiente | |
-| RF-19 | Listado de paquetes por cliente, estado o código | T2 | Pendiente | |
-| RF-20 | Actualizar estado con fecha, hora y ubicación | T2 | Pendiente | |
-| RF-21 | 4 estados (Recibido, En tránsito, En aduana, Listo para recoger) | T2 | Pendiente | |
-| RF-22 | Historial de estados cronológico e inmutable | T2 | Pendiente | |
-| RF-23 | Marcar pagado / no pagado | T2 | Pendiente | |
+| RF-16 | Registrar paquete asignado a cliente | T2 | Hecho | Solo almacén (D2). Precio automático: peso × tarifa × multiplicador de `useAppConfig()`; "Otros" ×1.0 como la app. No se edita a mano |
+| RF-17 | Código de rastreo único | T2 | Hecho | Restricción `packages_tracking_code_key` en la BD; la web avisa si se repite |
+| RF-18 | Excluir almacén/repartidor del buscador de clientes | T2 | Hecho | `findClients` filtra `role = 'cliente'` |
+| RF-19 | Listado de paquetes por cliente, estado o código | T2 | Hecho | Código y cliente se filtran en la BD; estado, sobre el último registro del historial |
+| RF-20 | Actualizar estado con fecha, hora y ubicación | T2 | Hecho | Ubicación en `notes`; fecha y hora = `created_at` (Managua) |
+| RF-21 | 4 estados (Recibido, En tránsito, En aduana, Listo para recoger) | T2 | Hecho | Catálogo `status_types`; solo avanza de uno en uno |
+| RF-22 | Historial de estados cronológico e inmutable | T2 | Hecho | La web solo inserta. Ojo: la RLS deja a un admin editar o borrar historial (ver problemas conocidos del T2) |
+| RF-23 | Marcar pagado / no pagado | T2 | Hecho | Automático como en la app: `register_payment` marca `is_paid` al quedar pagado y anular lo revierte. Sin interruptor manual |
 | RF-24 | Cliente ve solo sus paquetes | T3 | Pendiente | Realtime: hoy solo `users` e `invoices` emiten cambios (ver Notas del T1) |
 | RF-25 | Buscar paquete por código | T3 | Pendiente | |
 | RF-26 | Línea de tiempo visual | T3 | Pendiente | |
 | RF-27 | Fechas en hora local | T3 | Pendiente | |
 | RF-28 | Indicador de estado de pago | T3 | Pendiente | |
-| RF-29 | Recibo automático al llegar a "Listo para recoger" | T2 | Pendiente | Ver decisión D1 |
-| RF-30 | Recibo + ítems en una transacción | T2 | Pendiente | RPC `create_invoice` |
-| RF-31 | Número correlativo REC-00000 | T2 | Pendiente | |
-| RF-32 | Subtotal, impuesto, delivery y total | T2 | Pendiente | Ver decisión D3 |
+| RF-29 | Recibo automático al llegar a "Listo para recoger" | T2 | Hecho | D1: RPC `transition_package_ready`. **Falta que Juan la aplique en producción** |
+| RF-30 | Recibo + ítems en una transacción | T2 | Hecho | `transition_package_ready` llama a `create_invoice` e inserta el estado 4 en la misma transacción |
+| RF-31 | Número correlativo REC-00000 | T2 | Hecho | `formatInvoiceNumber` |
+| RF-32 | Subtotal, impuesto, delivery y total | T2 | Hecho | D3. El detalle muestra subtotal, impuesto, delivery (si lo tiene) y total |
 | RF-33 | Sumar delivery ($3.58) al solicitarlo | T3 | Pendiente | Lo aplica la solicitud de delivery. Monto: `useAppConfig().deliveryCost` |
-| RF-34 | Pagos totales o parciales | T2 | Pendiente | RPC `register_payment` |
-| RF-35 | 5 métodos de pago | T2 | Pendiente | |
-| RF-36 | Saldo pendiente | T2 | Pendiente | |
-| RF-37 | Anular recibo y revertir pago de paquetes | T2 | Pendiente | |
+| RF-34 | Pagos totales o parciales | T2 | Hecho | RPC `register_payment`; montos en centavos para evitar errores de redondeo |
+| RF-35 | 5 métodos de pago | T2 | Parcial | La BD solo acepta 4 métodos (efectivo, transferencia, tarjeta_datafono, tarjeta_online). "Contra entrega" lo cobra el repartidor en la app |
+| RF-36 | Saldo pendiente | T2 | Hecho | Total − pagos, en Facturación y Retiro |
+| RF-37 | Anular recibo y revertir pago de paquetes | T2 | Parcial | RPC `cancel_unpaid_invoice` (pendiente de revisión de Juan): anula y revierte `is_paid`, **solo si el recibo no tiene pagos** |
 | RF-38 | Cliente consulta historial de recibos y pagos | T3 | Pendiente | |
-| RF-39 | Un recibo activo por paquete | T2 | Pendiente | |
+| RF-39 | Un recibo activo por paquete | T2 | Hecho | `transition_package_ready` rechaza si el paquete ya tiene un recibo no anulado |
 | RF-40 | Descargar/imprimir recibo en PDF | T3 | Pendiente | También botón en facturación admin |
 | RF-41 | QR asociado a cada recibo | T3 | Pendiente | |
 | RF-42 | Mostrar y descargar QR | T3 | Pendiente | |
-| RF-43 | Validar retiro buscando REC | T2 | Pendiente | |
-| RF-44 | Mostrar cliente y estado de pago al validar | T2 | Pendiente | |
-| RF-45 | Cobrar saldo antes de autorizar el retiro | T2 | Pendiente | |
-| RF-46 | Rechazar recibos inexistentes | T2 | Pendiente | |
+| RF-43 | Validar retiro buscando REC | T2 | Hecho | `features/retiro`: busca por `REC-00000` |
+| RF-44 | Mostrar cliente y estado de pago al validar | T2 | Hecho | Muestra cliente, casillero, pagos y saldo |
+| RF-45 | Cobrar saldo antes de autorizar el retiro | T2 | Hecho | Cobro con el mismo modal de Facturación (solo admin) |
+| RF-46 | Rechazar recibos inexistentes | T2 | Hecho | Recibo inexistente → mensaje; recibo anulado → no autoriza el retiro |
 | RF-47 | Solicitar delivery de un recibo | T3 | Pendiente | + push a repartidores |
 | RF-48 | Delivery de varios paquetes en un pedido | T3 | Pendiente | + push a repartidores |
 | RF-49 | Rechazar delivery (retiro en sucursal por defecto) | T3 | Pendiente | |
@@ -84,11 +84,11 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-60 | Listar, buscar y consultar usuarios | T1 | Hecho | `features/usuarios`, búsqueda y paginación en servidor |
 | RF-61 | Promover cliente a repartidor | T1 | Hecho | RPC `promote_to_repartidor` |
 | RF-62 | Asignar rol almacén | T1 | Hecho | RPC nueva `set_user_role` (cliente ↔ almacén) |
-| RF-63 | Exportar CSV (paquetes, recibos, pedidos) | T2 / T3 | Pendiente | T2 crea `lib/csv.ts` + paquetes y recibos; T3 pedidos |
+| RF-63 | Exportar CSV (paquetes, recibos, pedidos) | T2 / T3 | Parcial | T2 hecho: `lib/csv.ts` (UTF-8 con BOM, coma, protegido contra fórmulas) + paquetes y recibos. T3: pedidos |
 | RF-64 | RBAC: cliente, repartidor, almacén, admin | T1 | Hecho | `features/acceso/roles.ts` (misma prioridad de roles que la app móvil) |
-| RF-65 | Restricciones del encargado de almacén | T1 / T2 | Parcial | T1 hecho: navegación (D9). T2: restricciones dentro de paquetes |
+| RF-65 | Restricciones del encargado de almacén | T1 / T2 | Hecho | T1: navegación (D9). T2: dentro de Paquetes solo registra y avanza a estados 1–2, sin ver pagos |
 | RF-66 | Candado en secciones no autorizadas | T1 | Hecho | `RequireAccess` + candado en el menú |
-| RF-67 | Almacén ve solo paquetes y estados permitidos | T2 | Pendiente | |
+| RF-67 | Almacén ve solo paquetes y estados permitidos | T2 | Hecho | Almacén solo ve estados 1–2 y no ve el estado de pago. La RLS limita su inserción a los estados 1–2. Ver problemas conocidos |
 | RF-68 | Rutas protegidas por rol | T1 | Hecho | `RequireAuth` + `RequireAccess` en cada `routes.tsx` |
 
 Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RNF-42 términos y privacidad (T1, **Hecho**: texto base en `/terminos` y `/privacidad`; la empresa debe revisarlo) · RNF-01 pruebas de RLS (T4) · RNF-20 navegadores (T4)
@@ -97,9 +97,9 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | ID | Tema | Estado | Resolución | Quién / fecha |
 |---|---|---|---|---|
 | D0 | Repartidor fuera de la web (pantalla app móvil), sin mapa, sin push en la web, QR sin cámara | Resuelta | Como dice el brief §2 | Equipo · 30-oct-2026 |
-| D1 | RF-29: recibo automático (trigger) o manual (create_invoice como en la app) | Pendiente | | |
-| D2 | Matriz: ¿admin bloqueado para asignar paquetes nuevos? | Pendiente | | |
-| D3 | Tasa y cálculo del impuesto (`tax_amount`) | Pendiente | | |
+| D1 | RF-29: recibo automático (trigger) o manual (create_invoice como en la app) | Resuelta | Automático **sin trigger**: la RPC `transition_package_ready` pasa el paquete a "Listo para recoger" y crea el recibo con `create_invoice` en una sola transacción. La app móvil no cambia | Daviana, revisado por Juan · 31-oct-2026 |
+| D2 | Matriz: ¿admin bloqueado para asignar paquetes nuevos? | Resuelta | Sí: solo almacén registra paquetes nuevos. El admin consulta, avanza estados (incluido el 4), cobra y anula | Daviana · 31-oct-2026 |
+| D3 | Tasa y cálculo del impuesto (`tax_amount`) | Resuelta | Impuesto 0, como lo calcula hoy `create_invoice` en el backend (igual que la app). La web no recalcula montos; si cambia la tasa, se cambia en la BD | Daviana · 31-oct-2026 |
 | D4 | Nombre visible: "Semtracar" o "Nica Cargo Xpress" | Resuelta | Siempre **SEMTRACAR** (logo naranja + azul). No se usa la marca ni el logo de Nica Cargo Xpress | Juan · 30-oct-2026 |
 | D5 | Diseño de la tabla `notifications` y eventos que la alimentan | Pendiente | | |
 | D6 | ¿Proyecto Supabase separado para desarrollo? | Resuelta | No se crea otro proyecto en la nube. Las migraciones se prueban en Supabase local (Docker: `supabase start` + `supabase db reset`) antes de que Juan haga `supabase db push` al proyecto real `cargo-express3` | Juan · 30-oct-2026 |
@@ -118,8 +118,11 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | `20261030010000_proteger_columnas_users.sql` | T1 | **Seguridad:** un usuario no puede cambiarse `role`, `is_admin` ni `casillero` | Sí, 30-oct-2026 (cerraba una escalada a admin) |
 | `20261030010100_rpc_registro_y_roles.sql` | T1 | RPC `is_email_registered`, `is_name_registered` (RF-02, RF-03) y `set_user_role` (RF-62) | Sí, 30-oct-2026 |
 | `20261030010200_app_config.sql` | T1 | Tabla `app_config` con tarifas, multiplicadores y delivery (RNF-34) | Sí, 30-oct-2026 |
+| `20261101010445_transition_package_ready.sql` | T2 | RPC `transition_package_ready` (D1, RF-29/30/39): estado 4 + recibo en una transacción, con bloqueo contra recibos dobles. Solo admin | **No.** Revisada por Juan; falta que la pruebe en local y la aplique |
+| `20261101020000_cancel_invoice_unpaid.sql` | T2 | RPC `cancel_unpaid_invoice` (RF-37): anula un recibo **sin pagos** y revierte `is_paid`. Solo admin | **No.** Propuesta: falta la revisión de Juan |
 
-Todas probadas en Supabase local (`supabase db reset`). Solo Juan aplica en producción.
+Las de T1 están probadas en Supabase local (`supabase db reset`). Las de T2 las probó Daviana en local; falta la prueba
+de Juan. Solo Juan aplica en producción.
 `src/types/database.ts` generado desde producción (`--linked`) después del `db push`.
 
 ## Bitácora de relevos
@@ -136,6 +139,50 @@ Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
 **Problemas conocidos:** …
 **Notas para el siguiente:** qué necesita saber, por dónde empezar, qué reutilizar
 -->
+
+### T2 · Daviana (31-oct-2026 → 31-oct-2026)
+**Hecho:** RF-16 a RF-23, RF-29 a RF-32, RF-34, RF-36, RF-39, RF-43 a RF-46, RF-65 y RF-67. De RF-63, la parte de T2
+(paquetes y recibos).
+**Parcial / no hecho:**
+- RF-35: la BD solo acepta 4 métodos de pago; "Contra entrega" lo cobra el repartidor desde la app.
+- RF-37: solo se anulan recibos **sin pagos**, y la migración está pendiente de la revisión de Juan. Falta decidir si se
+  pueden anular recibos con pagos y qué pasa con esos pagos.
+- RF-63: falta exportar pedidos (T3).
+**Archivos y servicios clave:**
+- `src/features/paquetes/services/packagesService.ts` → listado con filtros (RF-19), buscador de clientes (RF-18) y registro.
+- `src/features/paquetes/services/packageStatusService.ts` → historial, avance de estados y `markPackageReady` (RPC de D1).
+- `src/features/facturacion/services/invoicesService.ts` → recibos, detalle, `registerPayment`, `cancelUnpaidInvoice` y
+  `PAYMENT_METHODS`.
+- `@/features/facturacion` exporta `InvoiceDetailModal` (detalle + cobro + anular) y los tipos `Invoice` e `InvoiceDetail`.
+  Retiro ya lo reutiliza.
+- `src/features/retiro` → búsqueda por REC y validación del retiro.
+- `src/lib/csv.ts` → `downloadCsv(nombre, encabezados, filas)`: UTF-8 con BOM, coma y protección contra fórmulas.
+**Decisiones tomadas:** D1, D2 y D3.
+**Desviaciones del brief:** RF-35 con 4 métodos (límite de la BD). En Retiro no hay botón "Confirmar entrega física": la
+BD no tiene dónde guardarlo, y RF-43 a RF-46 solo piden validar el REC, mostrar cliente y saldo, cobrar y rechazar
+recibos inexistentes (acordado con Juan). No se crearon tablas nuevas.
+**Migraciones:** 2 nuevas, **ninguna aplicada en producción** (ver "Migraciones aplicadas"). Mientras no estén,
+"Listo para recoger" y "Anular" muestran un aviso claro en vez de fallar en silencio. Después de aplicarlas hay que
+regenerar `database.ts` y quitar el tipo temporal `TransactionDatabase` de `packageStatusService.ts` y el `as never`
+de `cancelUnpaidInvoice`.
+**Problemas conocidos:**
+- Filtro de almacén (RF-67) y de estado (RF-19): el último estado sale de `package_status_history`, así que se filtra
+  después de traer los paquetes. Para almacén, la página de 15 puede quedar con menos filas y el contador sigue contando
+  el total ("1–15 de 40"). La app móvil hace lo mismo. Se arregla con una vista o RPC con el estado actual (revisa Juan).
+- El registro de un paquete y su estado inicial ("Recibido en Estados Unidos") son dos inserciones; si falla la segunda,
+  la web avisa que no se registre otra vez. Lo ideal sería una RPC transaccional.
+- La RLS deja a un admin editar o borrar `package_status_history`: la web no lo hace, pero en la BD el historial no es
+  inmutable (para las pruebas RLS de T4).
+- Las migraciones de T2 llevan fecha 2026-11-01 en el nombre (posterior al cierre). Si Juan crea otra antes de esa
+  fecha, quedará ordenada antes; conviene revisarlo al aplicarlas.
+**Notas para el siguiente (T3 · Alberto):**
+- Recibos del cliente (RF-38): el tipo `Invoice` y `InvoiceDetailModal` vienen de `@/features/facturacion`. El modal
+  incluye cobro y "Anular" para admin; revísalo antes de reutilizarlo con el cliente o arma una vista de solo lectura.
+- Seguimiento (RF-24 a RF-28): el catálogo de estados y el historial están en `packageStatusService.ts`, pero todavía
+  no se exportan desde `@/features/paquetes`. Si los necesitas, expórtalos en su `index.ts` (commit aparte, anótalo).
+- CSV de pedidos (RF-63): usa `downloadCsv` de `@/lib/csv`.
+- Delivery (RF-33/47/48): el detalle del recibo ya muestra la línea "Delivery" cuando `has_delivery` es verdadero.
+- Para probar "Listo para recoger" y "Anular" en local, `supabase db reset` aplica las migraciones de T2.
 
 ### T1 · Juan (30-oct-2026 → 31-oct-2026)
 **Hecho:** base del proyecto (Vite + React + TS, Tailwind, ESLint, Prettier, Vitest, CI en GitHub Actions),
