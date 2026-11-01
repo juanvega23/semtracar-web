@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       app_config: {
@@ -573,6 +598,10 @@ export type Database = {
         Args: { p_deliverer_id: string; p_delivery_id: string }
         Returns: boolean
       }
+      cancel_unpaid_invoice: {
+        Args: { p_invoice_id: string }
+        Returns: undefined
+      }
       complete_delivery: {
         Args: { p_delivery_id: string; p_method?: string }
         Returns: undefined
@@ -620,6 +649,10 @@ export type Database = {
       set_user_role: {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined
+      }
+      transition_package_ready: {
+        Args: { p_location: string; p_package_id: string }
+        Returns: string
       }
       update_deliverer_location: {
         Args: { p_delivery_id: string; p_lat: number; p_lng: number }
@@ -753,6 +786,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

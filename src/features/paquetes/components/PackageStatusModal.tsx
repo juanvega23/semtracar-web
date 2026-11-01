@@ -121,8 +121,7 @@ export function PackageStatusModal({ selected, role, onClose }: Props) {
               </SelectField>
               {nextStatus === '4' && (
                 <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-                  Al guardar se generará automáticamente el recibo del paquete. Esta operación requiere la
-                  función transaccional revisada en Supabase local.
+                  Al guardar se generará automáticamente el recibo del paquete.
                 </p>
               )}
               <TextField

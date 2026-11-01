@@ -95,14 +95,6 @@ export async function registerInvoicePayment(input: {
 
 /** RF-37: RPC transaccional; rechaza recibos con pagos. */
 export async function cancelUnpaidInvoice(invoiceId: string): Promise<void> {
-  const { error } = await supabase.rpc(
-    'cancel_unpaid_invoice' as never,
-    { p_invoice_id: invoiceId } as never,
-  );
-  if (error) {
-    if (error.code === 'PGRST202' || error.code === '42883') {
-      throw new Error('La función para anular recibos aún no está instalada. Solicita su revisión a Juan.');
-    }
-    throw error;
-  }
+  const { error } = await supabase.rpc('cancel_unpaid_invoice', { p_invoice_id: invoiceId });
+  if (error) throw error;
 }

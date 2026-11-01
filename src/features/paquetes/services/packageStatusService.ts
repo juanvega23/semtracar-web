@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type StatusHistory = Database['public']['Tables']['package_status_history']['Row'];
 export type StatusCatalog = Database['public']['Tables']['status_types']['Row'];
@@ -74,41 +73,18 @@ export async function addPackageStatus(input: {
   if (error) throw error;
 }
 
-/**
- * D1: cambio a estado 4 + creación del recibo en UNA transacción de PostgreSQL.
- * La función debe ser revisada y creada en Supabase local por Juan antes de habilitarlo.
- * No se modifica src/types/database.ts (generado); se amplía el tipo solo en este servicio.
- */
-type TransactionDatabase = Omit<Database, 'public'> & {
-  public: Omit<Database['public'], 'Functions'> & {
-    Functions: Database['public']['Functions'] & {
-      transition_package_ready: {
-        Args: { p_package_id: string; p_location: string };
-        Returns: string;
-      };
-    };
-  };
-};
-
+/** D1: cambio a estado 4 + creación del recibo en UNA transacción de PostgreSQL (RPC `transition_package_ready`). */
 export async function markPackageReady(input: { packageId: string; location: string }): Promise<string> {
   const location = input.location.trim();
   if (!location || location.length > 200) {
     throw new Error('Ingresa una ubicación de 1 a 200 caracteres.');
   }
   // No sustituir por create_invoice + insert en el navegador: serían dos transacciones.
-  const typedClient = supabase as unknown as SupabaseClient<TransactionDatabase>;
-  const { data, error } = await typedClient.rpc('transition_package_ready', {
+  const { data, error } = await supabase.rpc('transition_package_ready', {
     p_package_id: input.packageId,
     p_location: location,
   });
-  if (error) {
-    if (error.code === 'PGRST202' || error.code === '42883') {
-      throw new Error(
-        'La función transaccional de facturación aún no está instalada. Solicita su revisión a Juan.',
-      );
-    }
-    throw error;
-  }
+  if (error) throw error;
   if (!data) throw new Error('La base de datos no devolvió el identificador del recibo.');
   return data;
 }
