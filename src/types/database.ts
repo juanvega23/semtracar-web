@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.15"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -43,7 +48,6 @@ export type Database = {
           updated_at: string
           value: number
         }
-        ComputedFields: never
         Insert: {
           description: string
           key: string
@@ -100,7 +104,6 @@ export type Database = {
           proof_url: string | null
           status: string
         }
-        ComputedFields: never
         Insert: {
           accepted_at?: string | null
           client_id: string
@@ -184,7 +187,6 @@ export type Database = {
           invoice_id: string | null
           package_id: string
         }
-        ComputedFields: never
         Insert: {
           created_at?: string | null
           delivery_id: string
@@ -231,7 +233,6 @@ export type Database = {
           invoice_id: string
           package_id: string
         }
-        ComputedFields: never
         Insert: {
           amount: number
           description: string
@@ -282,7 +283,6 @@ export type Database = {
           total: number
           user_id: string
         }
-        ComputedFields: never
         Insert: {
           created_at?: string
           delivery_address?: string | null
@@ -344,7 +344,6 @@ export type Database = {
           package_id: string
           status_id: number
         }
-        ComputedFields: never
         Insert: {
           created_at?: string
           id?: string
@@ -381,7 +380,6 @@ export type Database = {
           id: number
           name: string
         }
-        ComputedFields: never
         Insert: {
           id: number
           name: string
@@ -404,7 +402,6 @@ export type Database = {
           user_id: string
           weight: number
         }
-        ComputedFields: never
         Insert: {
           created_at?: string
           id?: string
@@ -462,7 +459,6 @@ export type Database = {
           reference: string | null
           registered_by: string | null
         }
-        ComputedFields: never
         Insert: {
           amount: number
           bank_name?: string | null
@@ -505,7 +501,6 @@ export type Database = {
           id: number
           name: string
         }
-        ComputedFields: never
         Insert: {
           id: number
           name: string
@@ -521,7 +516,6 @@ export type Database = {
           id: number
           name: string
         }
-        ComputedFields: never
         Insert: {
           id: number
           name: string
@@ -539,7 +533,6 @@ export type Database = {
           updated_at: string | null
           user_id: string
         }
-        ComputedFields: never
         Insert: {
           id?: string
           token: string
@@ -568,7 +561,6 @@ export type Database = {
           phone: string | null
           role: string
         }
-        ComputedFields: never
         Insert: {
           address?: string | null
           casillero: string
@@ -621,9 +613,9 @@ export type Database = {
       }
       decline_delivery: { Args: { p_invoice_id: string }; Returns: undefined }
       delivery_balance: { Args: { p_delivery_id: string }; Returns: number }
-      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean }
-      is_admin_user: { Args: Record<PropertyKey, never>; Returns: boolean }
-      is_almacen: { Args: Record<PropertyKey, never>; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
+      is_admin_user: { Args: never; Returns: boolean }
+      is_almacen: { Args: never; Returns: boolean }
       is_email_registered: { Args: { p_email: string }; Returns: boolean }
       is_name_registered: {
         Args: { p_last_name: string; p_name: string }
@@ -716,7 +708,8 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -740,7 +733,8 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -764,7 +758,8 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
