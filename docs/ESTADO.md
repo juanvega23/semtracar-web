@@ -50,7 +50,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-26 | Línea de tiempo visual | T3 | Pendiente | |
 | RF-27 | Fechas en hora local | T3 | Pendiente | |
 | RF-28 | Indicador de estado de pago | T3 | Pendiente | |
-| RF-29 | Recibo automático al llegar a "Listo para recoger" | T2 | Hecho | D1: RPC `transition_package_ready`. **Falta que Juan la aplique en producción** |
+| RF-29 | Recibo automático al llegar a "Listo para recoger" | T2 | Hecho | D1: RPC `transition_package_ready` (en producción desde el 31-oct-2026) |
 | RF-30 | Recibo + ítems en una transacción | T2 | Hecho | `transition_package_ready` llama a `create_invoice` e inserta el estado 4 en la misma transacción |
 | RF-31 | Número correlativo REC-00000 | T2 | Hecho | `formatInvoiceNumber` |
 | RF-32 | Subtotal, impuesto, delivery y total | T2 | Hecho | D3. El detalle muestra subtotal, impuesto, delivery (si lo tiene) y total |
@@ -58,7 +58,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-34 | Pagos totales o parciales | T2 | Hecho | RPC `register_payment`; montos en centavos para evitar errores de redondeo |
 | RF-35 | 5 métodos de pago | T2 | Parcial | La BD solo acepta 4 métodos (efectivo, transferencia, tarjeta_datafono, tarjeta_online). "Contra entrega" lo cobra el repartidor en la app |
 | RF-36 | Saldo pendiente | T2 | Hecho | Total − pagos, en Facturación y Retiro |
-| RF-37 | Anular recibo y revertir pago de paquetes | T2 | Parcial | RPC `cancel_unpaid_invoice` (pendiente de revisión de Juan): anula y revierte `is_paid`, **solo si el recibo no tiene pagos** |
+| RF-37 | Anular recibo y revertir pago de paquetes | T2 | Parcial | RPC `cancel_unpaid_invoice` (en producción desde el 31-oct-2026): anula y revierte `is_paid`, **solo si el recibo no tiene pagos** (Juan lo dejó así: anular uno pagado implicaría devoluciones). Falta: un paquete con su recibo anulado no puede generar uno nuevo desde la web |
 | RF-38 | Cliente consulta historial de recibos y pagos | T3 | Pendiente | |
 | RF-39 | Un recibo activo por paquete | T2 | Hecho | `transition_package_ready` rechaza si el paquete ya tiene un recibo no anulado |
 | RF-40 | Descargar/imprimir recibo en PDF | T3 | Pendiente | También botón en facturación admin |
@@ -118,11 +118,12 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | `20261030010000_proteger_columnas_users.sql` | T1 | **Seguridad:** un usuario no puede cambiarse `role`, `is_admin` ni `casillero` | Sí, 30-oct-2026 (cerraba una escalada a admin) |
 | `20261030010100_rpc_registro_y_roles.sql` | T1 | RPC `is_email_registered`, `is_name_registered` (RF-02, RF-03) y `set_user_role` (RF-62) | Sí, 30-oct-2026 |
 | `20261030010200_app_config.sql` | T1 | Tabla `app_config` con tarifas, multiplicadores y delivery (RNF-34) | Sí, 30-oct-2026 |
-| `20261101010445_transition_package_ready.sql` | T2 | RPC `transition_package_ready` (D1, RF-29/30/39): estado 4 + recibo en una transacción, con bloqueo contra recibos dobles. Solo admin | **No.** Revisada por Juan; falta que la pruebe en local y la aplique |
-| `20261101020000_cancel_invoice_unpaid.sql` | T2 | RPC `cancel_unpaid_invoice` (RF-37): anula un recibo **sin pagos** y revierte `is_paid`. Solo admin | **No.** Propuesta: falta la revisión de Juan |
+| `20261101010445_transition_package_ready.sql` | T2 | RPC `transition_package_ready` (D1, RF-29/30/39): estado 4 + recibo en una transacción, con bloqueo contra recibos dobles. Solo admin | Sí, 31-oct-2026 |
+| `20261101020000_cancel_invoice_unpaid.sql` | T2 | RPC `cancel_unpaid_invoice` (RF-37): anula un recibo **sin pagos** y revierte `is_paid`. Solo admin | Sí, 31-oct-2026 |
 
-Las de T1 están probadas en Supabase local (`supabase db reset`). Las de T2 las probó Daviana en local; falta la prueba
-de Juan. Solo Juan aplica en producción.
+Las de T1 están probadas en Supabase local (`supabase db reset`). Las de T2 las probaron Daviana y Juan en local (9 casos:
+permisos, saltos de estado, recibo doble, anular con pagos, anular dos veces). Solo Juan aplica en producción.
+Después de aplicarlas se regeneró `database.ts` y se quitaron los tipos temporales (`TransactionDatabase`, `as never`).
 `src/types/database.ts` generado desde producción (`--linked`) después del `db push`.
 
 ## Bitácora de relevos
