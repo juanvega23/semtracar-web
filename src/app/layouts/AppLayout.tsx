@@ -30,7 +30,7 @@ export function AppLayout() {
             <Logo className="h-9 sm:h-10" />
           </Link>
 
-          <nav aria-label="Principal" className="ml-6 hidden h-full items-stretch gap-1 md:flex">
+          <nav aria-label="Principal" className="ml-6 hidden h-full items-stretch gap-1 xl:flex">
             {items.map((item) => (
               <NavLink
                 key={item.to}
@@ -65,13 +65,13 @@ export function AppLayout() {
             >
               <BellIcon size={22} />
             </NavLink>
-            <span className="hidden h-8 w-px bg-slate-200 md:block" aria-hidden="true" />
-            <div className="hidden md:block">
+            <span className="hidden h-8 w-px bg-slate-200 xl:block" aria-hidden="true" />
+            <div className="hidden xl:block">
               <UserMenu user={user} />
             </div>
             <button
               type="button"
-              className="rounded-xl p-2.5 text-ink-800 hover:bg-slate-50 md:hidden"
+              className="rounded-xl p-2.5 text-ink-800 hover:bg-slate-50 xl:hidden"
               onClick={() => setMobileOpen((v) => !v)}
               aria-expanded={mobileOpen}
               aria-controls="menu-movil"
@@ -83,7 +83,7 @@ export function AppLayout() {
         </div>
 
         {mobileOpen && (
-          <div id="menu-movil" className="border-t border-slate-200 bg-white px-4 pt-3 pb-5 md:hidden">
+          <div id="menu-movil" className="border-t border-slate-200 bg-white px-4 pt-3 pb-5 xl:hidden">
             <div className="mb-3 flex items-center gap-3 rounded-xl bg-slate-50 p-3">
               <UserAvatar />
               <div className="leading-tight">
