@@ -14,13 +14,19 @@ export type Invoice = Pick<
   | 'total'
   | 'status'
   | 'created_at'
->;
+> & { notes?: string | null };
 export type InvoiceItem = Pick<Tables<'invoice_items'>, 'id' | 'description' | 'amount' | 'package_id'>;
 export type Payment = Pick<
   Tables<'payments'>,
   'id' | 'amount' | 'method' | 'reference' | 'bank_name' | 'paid_at'
 >;
-export type InvoiceDetail = { items: InvoiceItem[]; payments: Payment[] };
+export type InvoiceClient = Pick<Tables<'users'>, 'name' | 'last_name' | 'casillero'>;
+export type InvoiceDetail = {
+  items: InvoiceItem[];
+  payments: Payment[];
+  invoice?: Invoice;
+  client?: InvoiceClient | null;
+};
 export type PaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta_datafono' | 'tarjeta_online';
 
 export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
@@ -33,17 +39,21 @@ export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
 export async function listInvoices(
   page: number,
   search: string,
+  userId?: string,
 ): Promise<{ items: Invoice[]; total: number }> {
   const normalized = search.trim().toUpperCase();
   let query = supabase
     .from('invoices')
     .select(
-      'id,invoice_number,user_id,subtotal,tax_amount,has_delivery,delivery_cost,total,status,created_at',
+      'id,invoice_number,user_id,subtotal,tax_amount,has_delivery,delivery_cost,total,status,created_at,notes',
       { count: 'exact' },
     )
+    .eq('document_type', 'recibo')
     .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
     .range(page * INVOICES_PAGE_SIZE, (page + 1) * INVOICES_PAGE_SIZE - 1);
 
+  if (userId) query = query.eq('user_id', userId);
   if (normalized) {
     const match = /^REC-(\d{1,9})$/.exec(normalized) ?? /^(\d{1,9})$/.exec(normalized);
     if (!match) return { items: [], total: 0 };
@@ -56,17 +66,26 @@ export async function listInvoices(
 }
 
 export async function getInvoiceDetail(invoiceId: string): Promise<InvoiceDetail> {
-  const [itemsResult, paymentsResult] = await Promise.all([
+  const [itemsResult, paymentsResult, invoiceResult] = await Promise.all([
     supabase.from('invoice_items').select('id,description,amount,package_id').eq('invoice_id', invoiceId),
     supabase
       .from('payments')
       .select('id,amount,method,reference,bank_name,paid_at')
       .eq('invoice_id', invoiceId)
       .order('paid_at', { ascending: true }),
+    supabase
+      .from('invoices')
+      .select(
+        'id,invoice_number,user_id,subtotal,tax_amount,has_delivery,delivery_cost,total,status,created_at,notes,client:users!invoices_user_id_fkey(name,last_name,casillero)',
+      )
+      .eq('id', invoiceId)
+      .single(),
   ]);
   if (itemsResult.error) throw itemsResult.error;
   if (paymentsResult.error) throw paymentsResult.error;
-  return { items: itemsResult.data ?? [], payments: paymentsResult.data ?? [] };
+  if (invoiceResult.error) throw invoiceResult.error;
+  const { client, ...invoice } = invoiceResult.data;
+  return { items: itemsResult.data ?? [], payments: paymentsResult.data ?? [], invoice, client };
 }
 
 export async function registerInvoicePayment(input: {
