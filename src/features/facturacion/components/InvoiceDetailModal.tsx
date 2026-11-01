@@ -10,18 +10,22 @@ import {
   useToast,
 } from '@/components/ui';
 import { formatDateTime, formatInvoiceNumber, formatUSD } from '@/lib/format';
+import { useRequiredCurrentUser } from '@/features/acceso';
+import { ReceiptActions } from '@/features/recibos';
 import { useCancelUnpaidInvoice, useInvoiceDetail, useRegisterInvoicePayment } from '../hooks/useInvoices';
 import { PAYMENT_METHODS, type Invoice, type PaymentMethod } from '../services/invoicesService';
 
 type Props = { invoice: Invoice | null; onClose: () => void };
 const cents = (amount: number) => Math.round(amount * 100);
 
-export function InvoiceDetailModal({ invoice, onClose }: Props) {
+export function InvoiceDetailModal({ invoice: selectedInvoice, onClose }: Props) {
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PaymentMethod>('efectivo');
   const [reference, setReference] = useState('');
   const [bankName, setBankName] = useState('');
-  const detail = useInvoiceDetail(invoice?.id ?? null);
+  const detail = useInvoiceDetail(selectedInvoice?.id ?? null);
+  const invoice = detail.data?.invoice ?? selectedInvoice;
+  const canManage = useRequiredCurrentUser().role === 'admin';
   const register = useRegisterInvoicePayment();
   const cancelInvoice = useCancelUnpaidInvoice();
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -29,9 +33,16 @@ export function InvoiceDetailModal({ invoice, onClose }: Props) {
   const paidCents = (detail.data?.payments ?? []).reduce((sum, item) => sum + cents(Number(item.amount)), 0);
   const balanceCents = Math.max(0, cents(Number(invoice?.total ?? 0)) - paidCents);
   const amountCents = cents(Number(amount));
-  const canPay = Boolean(invoice && invoice.status !== 'anulada' && balanceCents > 0);
+  const canPay = Boolean(
+    canManage && detail.data && invoice && invoice.status !== 'anulada' && balanceCents > 0,
+  );
   const canCancel = Boolean(
-    invoice && invoice.status !== 'anulada' && detail.data && detail.data.payments.length === 0,
+    canManage &&
+    invoice &&
+    invoice.status !== 'anulada' &&
+    !invoice.has_delivery &&
+    detail.data &&
+    detail.data.payments.length === 0,
   );
   const amountValid =
     amount.trim() !== '' &&
@@ -86,6 +97,13 @@ export function InvoiceDetailModal({ invoice, onClose }: Props) {
         <ErrorState onRetry={() => void detail.refetch()} />
       ) : invoice ? (
         <div className="space-y-5">
+          {detail.data && <ReceiptActions invoice={invoice} detail={detail.data} />}
+          {detail.data?.client && (
+            <p className="text-sm text-slate-600">
+              {detail.data.client.name} {detail.data.client.last_name} · {detail.data.client.casillero}
+            </p>
+          )}
+          {invoice.notes && <p className="text-sm whitespace-pre-line text-slate-600">{invoice.notes}</p>}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="text-sm text-slate-600">{formatDateTime(invoice.created_at)}</span>
             <Badge
@@ -196,7 +214,14 @@ export function InvoiceDetailModal({ invoice, onClose }: Props) {
               </div>
             </form>
           )}
-          {!canPay && <p className="text-sm text-slate-600">Este recibo no admite nuevos pagos.</p>}
+          {canManage && !canPay && (
+            <p className="text-sm text-slate-600">Este recibo no admite nuevos pagos.</p>
+          )}
+          {canManage && invoice.has_delivery && invoice.status !== 'anulada' && (
+            <p className="text-sm text-slate-600">
+              Para anular este recibo, cancela primero el pedido de delivery desde Pedidos.
+            </p>
+          )}
           {canCancel && !confirmCancel && (
             <div className="border-t border-slate-200 pt-4">
               <Button variant="outline" onClick={() => setConfirmCancel(true)}>
@@ -231,7 +256,7 @@ export function InvoiceDetailModal({ invoice, onClose }: Props) {
               </div>
             </div>
           )}
-          {invoice.status !== 'anulada' && detail.data && detail.data.payments.length > 0 && (
+          {canManage && invoice.status !== 'anulada' && detail.data && detail.data.payments.length > 0 && (
             <p className="text-sm text-slate-600">
               La anulación de recibos con pagos requiere un procedimiento de devolución aprobado.
             </p>
