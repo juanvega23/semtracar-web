@@ -76,7 +76,7 @@ Requiere Docker Desktop abierto.
 ```bash
 supabase start            # levanta la base local con todas las migraciones
 supabase db reset         # la reinicia desde cero (borra los datos locales)
-supabase test db          # pruebas SQL de seguridad y reglas de negocio
+supabase test db          # pruebas SQL de seguridad y reglas; requiere la base recién reiniciada
 supabase status -o env    # muestra API_URL y ANON_KEY locales
 ```
 Para que la web use la base local, crea `.env.development.local` (no se sube) con `VITE_SUPABASE_URL` y

@@ -160,7 +160,7 @@ cerrar su pedido y dejar su recibo pagado sin pagar; almacén podía marcar paqu
 borrar el historial.
 **Cerrado de turnos anteriores:** RNF-23 (registro de paquete transaccional), RF-67 (paginación de almacén), RF-37 (recibo
 anulado sin salida), RNF-39 (índices).
-**Validación:** lint, typecheck, format:check, build, 67 pruebas Vitest, 116 pruebas SQL y 37 comprobaciones en navegador
+**Validación:** lint, typecheck, format:check, build, 67 pruebas Vitest, 114 pruebas SQL y 37 comprobaciones en navegador
 con cada rol (Edge), a 1366 y 390 px. Verificado en producción que los accesos sin sesión se rechazan.
 **Falta, depende de Juan:**
 - Probar en la app móvil real, con la versión nueva del backend: aceptar y entregar un pedido como repartidor, registrar

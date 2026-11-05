@@ -37,7 +37,7 @@ Requiere Docker Desktop.
 ```bash
 supabase start            # base local con todas las migraciones y las cuentas de prueba
 supabase db reset         # la reinicia desde cero
-supabase test db          # pruebas SQL de seguridad y reglas de negocio
+supabase test db          # pruebas SQL de seguridad y reglas; requiere la base recién reiniciada
 supabase status -o env    # API_URL y ANON_KEY locales
 ```
 
