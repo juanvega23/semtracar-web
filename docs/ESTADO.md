@@ -4,7 +4,7 @@
 > (ver `AGENTS.md`). Manda sobre el brief en cuanto a avance y decisiones; el flujo de Git es el de D8.
 
 ## Turno actual
-**T4 · Juan**. Estado: Pendiente (T3 cerrado el 1-nov-2026)
+**T4 · Juan**. Estado: En curso. Falta lo que depende de Juan (ver bitácora del T4).
 Siguiente: cierre del proyecto (`v1.0.0`)
 
 ## Turnos
@@ -13,7 +13,7 @@ Siguiente: cierre del proyecto (`v1.0.0`)
 | T1 | Juan | Base, auth, accesos, usuarios, app_config, esqueleto de features | Cerrado | `turno-1-juan` | 30-oct-2026 | 31-oct-2026 |
 | T2 | Daviana | Paquetes, modo almacén, facturación y pagos, retiro por REC, CSV | Cerrado | `turno-2-daviana` | 31-oct-2026 | 31-oct-2026 |
 | T3 | Alberto | Cotizador, seguimiento, recibos del cliente + PDF/QR, delivery + push, pedidos admin | Cerrado | `turno-3-alberto` | 1-nov-2026 | 1-nov-2026 |
-| T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | Pendiente | `v1.0.0` | | |
+| T4 | Juan | Avisos, correos, dashboard, pruebas RLS y por rol, deploy final | En curso | `v1.0.0` | 4-nov-2026 | |
 
 Estados de turno: Pendiente · En curso · Cerrado
 
@@ -37,13 +37,13 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-13 | Multiplicadores por categoría | T3 | Hecho | `useAppConfig()`; solo categorías configuradas (Otros no se cotiza) |
 | RF-14 | Validar peso (> 0, ≤ 1000, decimal) | T3 | Hecho | Zod; admite punto o coma decimal, rechaza vacío, cero, negativos y > 1000 |
 | RF-15 | Mostrar desglose y total | T3 | Hecho | Base, multiplicador, ajuste y estimación final con 2 decimales |
-| RF-16 | Registrar paquete asignado a cliente | T2 | Hecho | Solo almacén (D2). Precio automático: peso × tarifa × multiplicador de `useAppConfig()`; "Otros" ×1.0 como la app. No se edita a mano |
+| RF-16 | Registrar paquete asignado a cliente | T2 | Hecho | Solo almacén (D2). RPC `register_package`: calcula el precio en la base y crea el paquete con su estado inicial en una transacción. "Otros" ×1.00 como la app |
 | RF-17 | Código de rastreo único | T2 | Hecho | Restricción `packages_tracking_code_key` en la BD; la web avisa si se repite |
 | RF-18 | Excluir almacén/repartidor del buscador de clientes | T2 | Hecho | `findClients` filtra `role = 'cliente'` |
-| RF-19 | Listado de paquetes por cliente, estado o código | T2 | Hecho | Código y cliente se filtran en la BD; estado, sobre el último registro del historial |
+| RF-19 | Listado de paquetes por cliente, estado o código | T2 | Hecho | Código, cliente y estado se filtran en la base con la vista `packages_with_status` |
 | RF-20 | Actualizar estado con fecha, hora y ubicación | T2 | Hecho | Ubicación en `notes`; fecha y hora = `created_at` (Managua) |
 | RF-21 | 4 estados (Recibido, En tránsito, En aduana, Listo para recoger) | T2 | Hecho | Catálogo `status_types`; solo avanza de uno en uno |
-| RF-22 | Historial de estados cronológico e inmutable | T2 | Hecho | La web solo inserta. Ojo: la RLS deja a un admin editar o borrar historial (ver problemas conocidos del T2) |
+| RF-22 | Historial de estados cronológico e inmutable | T2 | Hecho | La web solo inserta. Desde T4 la RLS tampoco deja editar ni borrar el historial |
 | RF-23 | Marcar pagado / no pagado | T2 | Hecho | Automático como en la app: `register_payment` marca `is_paid` al quedar pagado y anular lo revierte. Sin interruptor manual |
 | RF-24 | Cliente ve solo sus paquetes | T3 | Hecho | Filtro por usuario + RLS probada en local. Realtime (publicado en producción el 1-nov-2026) y respaldo cada 30 s |
 | RF-25 | Buscar paquete por código | T3 | Hecho | Búsqueda y paginación en servidor entre paquetes propios |
@@ -58,7 +58,7 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-34 | Pagos totales o parciales | T2 | Hecho | RPC `register_payment`; montos en centavos para evitar errores de redondeo |
 | RF-35 | 5 métodos de pago | T2 | Parcial | La BD solo acepta 4 métodos (efectivo, transferencia, tarjeta_datafono, tarjeta_online). "Contra entrega" lo cobra el repartidor en la app |
 | RF-36 | Saldo pendiente | T2 | Hecho | Total − pagos, en Facturación y Retiro |
-| RF-37 | Anular recibo y revertir pago de paquetes | T2 | Parcial | RPC `cancel_unpaid_invoice` (en producción desde el 31-oct-2026): anula y revierte `is_paid`, **solo si el recibo no tiene pagos** (Juan lo dejó así: anular uno pagado implicaría devoluciones). Falta: un paquete con su recibo anulado no puede generar uno nuevo desde la web |
+| RF-37 | Anular recibo y revertir pago de paquetes | T2 | Parcial | RPC `cancel_unpaid_invoice`: anula y revierte `is_paid`, **solo si el recibo no tiene pagos** (Juan lo dejó así: anular uno pagado implicaría devoluciones). RPC `reissue_invoice` y botón en Paquetes para generar de nuevo el recibo de un paquete listo |
 | RF-38 | Cliente consulta historial de recibos y pagos | T3 | Hecho | Historial propio + detalle de solo lectura, pagos y saldo actualizado |
 | RF-39 | Un recibo activo por paquete | T2 | Hecho | `transition_package_ready` rechaza si el paquete ya tiene un recibo no anulado |
 | RF-40 | Descargar/imprimir recibo en PDF | T3 | Hecho | PDF descargado y comprobado en Chrome; abrir el archivo para imprimir. También en admin |
@@ -75,12 +75,12 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-51 | Estado del pedido, horas y repartidor asignado | T3 | Hecho | Pedido, repartidor, horas, dirección y paquetes; sin mapa. Realtime + respaldo 30 s |
 | RF-52 | Admin ve pedidos y repartidor | T3 | Hecho | Listado paginado por estado, cliente, contacto y repartidor |
 | RF-53 | Admin cancela pedido | T3 | Hecho | Nueva RPC atómica: quita el cargo sin pagos; con pagos exige revisión (D13). En producción desde el 1-nov-2026 |
-| RF-54 | Centro de avisos con contador | T4 | Pendiente | Tabla `notifications` (D5) |
-| RF-55 | Avisos en tiempo real | T4 | Pendiente | |
-| RF-56 | Correos ante eventos críticos | T4 | Pendiente | Edge Function |
-| RF-57 | Marcar avisos como leídos e historial | T4 | Pendiente | |
-| RF-58 | Dashboard de indicadores | T4 | Pendiente | |
-| RF-59 | Reporte de entregas por repartidor | T4 | Pendiente | |
+| RF-54 | Centro de avisos con contador | T4 | Hecho | `features/avisos` y contador en la campana. Tabla `notifications` (D5) |
+| RF-55 | Avisos en tiempo real | T4 | Hecho | Realtime sobre `notifications` y respaldo cada 30 s. Comprobado en navegador |
+| RF-56 | Correos ante eventos críticos | T4 | Parcial | Edge Function `send-email-notification` lista y probada sin envío real. **Falta** la cuenta de Resend, los secretos, publicarla y crear el webhook (ver README) |
+| RF-57 | Marcar avisos como leídos e historial | T4 | Hecho | Marcar uno o todos como leídos; el historial se conserva |
+| RF-58 | Dashboard de indicadores | T4 | Hecho | `features/dashboard` + RPC `admin_dashboard`. Selector de mes, en hora de Managua |
+| RF-59 | Reporte de entregas por repartidor | T4 | Hecho | Tabla y CSV por repartidor: entregas del mes, totales y en curso |
 | RF-60 | Listar, buscar y consultar usuarios | T1 | Hecho | `features/usuarios`, búsqueda y paginación en servidor |
 | RF-61 | Promover cliente a repartidor | T1 | Hecho | RPC `promote_to_repartidor` |
 | RF-62 | Asignar rol almacén | T1 | Hecho | RPC nueva `set_user_role` (cliente ↔ almacén) |
@@ -88,10 +88,10 @@ Estados: Pendiente · En curso · Hecho · Parcial · No hecho · Fuera de alcan
 | RF-64 | RBAC: cliente, repartidor, almacén, admin | T1 | Hecho | `features/acceso/roles.ts` (misma prioridad de roles que la app móvil) |
 | RF-65 | Restricciones del encargado de almacén | T1 / T2 | Hecho | T1: navegación (D9). T2: dentro de Paquetes solo registra y avanza a estados 1–2, sin ver pagos |
 | RF-66 | Candado en secciones no autorizadas | T1 | Hecho | `RequireAccess` + candado en el menú |
-| RF-67 | Almacén ve solo paquetes y estados permitidos | T2 | Hecho | Almacén solo ve estados 1–2 y no ve el estado de pago. La RLS limita su inserción a los estados 1–2. Ver problemas conocidos |
+| RF-67 | Almacén ve solo paquetes y estados permitidos | T2 | Hecho | Almacén solo ve estados 1–2 y no ve el estado de pago; el filtro va en la base y el contador coincide. La RLS ya no le deja actualizar paquetes |
 | RF-68 | Rutas protegidas por rol | T1 | Hecho | `RequireAuth` + `RequireAccess` en cada `routes.tsx` |
 
-Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RNF-42 términos y privacidad (T1, **Hecho**: texto base en `/terminos` y `/privacidad`; la empresa debe revisarlo) · RNF-01 pruebas de RLS (T4) · RNF-20 navegadores (T4)
+Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RNF-42 términos y privacidad (T1, **Hecho**: texto base en `/terminos` y `/privacidad`; la empresa debe revisarlo) · RNF-01 pruebas de RLS (T4, **Hecho**: `supabase/tests/t4_seguridad.test.sql`) · RNF-20 navegadores (T4, **Parcial**: probada en Edge y Chrome; faltan Firefox y Safari)
 
 ## Decisiones
 | ID | Tema | Estado | Resolución | Quién / fecha |
@@ -101,7 +101,7 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | D2 | Matriz: ¿admin bloqueado para asignar paquetes nuevos? | Resuelta | Sí: solo almacén registra paquetes nuevos. El admin consulta, avanza estados (incluido el 4), cobra y anula | Daviana · 31-oct-2026 |
 | D3 | Tasa y cálculo del impuesto (`tax_amount`) | Resuelta | Impuesto 0, como lo calcula hoy `create_invoice` en el backend (igual que la app). La web no recalcula montos; si cambia la tasa, se cambia en la BD | Daviana · 31-oct-2026 |
 | D4 | Nombre visible: "Semtracar" o "Nica Cargo Xpress" | Resuelta | Siempre **SEMTRACAR** (logo naranja + azul). No se usa la marca ni el logo de Nica Cargo Xpress | Juan · 30-oct-2026 |
-| D5 | Diseño de la tabla `notifications` y eventos que la alimentan | Pendiente | | |
+| D5 | Diseño de la tabla `notifications` y eventos que la alimentan | Resuelta | Tabla `notifications`, una fila por usuario y aviso; solo se lee y se marca como leído. La alimentan triggers, así también salen los avisos de lo hecho en la app móvil. Cliente: cambio de estado, paquete listo, recibo generado o anulado, pago y cambios del pedido. Admin: pedido nuevo. Correo solo para paquete listo, recibo generado y entrega confirmada (RF-56). Un fallo al crear el aviso nunca bloquea la operación | Juan · 4-nov-2026 |
 | D6 | ¿Proyecto Supabase separado para desarrollo? | Resuelta | No se crea otro proyecto en la nube. Las migraciones se prueban en Supabase local (Docker: `supabase start` + `supabase db reset`) antes de que Juan haga `supabase db push` al proyecto real `cargo-express3` | Juan · 30-oct-2026 |
 | D7 | Mapa "Ubicación del paquete" de la referencia visual | Resuelta | Sin mapa embebido: se muestra la dirección de la sucursal y un botón "Cómo llegar" que abre Google Maps en otra pestaña. Sin librería de mapas | Juan · 30-oct-2026 |
 | D8 | Flujo de Git (reemplaza brief §7.3–7.4 y §8.2–8.6 en lo que toca a GitHub) | Resuelta | Commits directo a `main`, con `git pull` antes de empezar y verificaciones en verde antes de `git push`. **Sin** Pull Requests, Issues, milestones, etiquetas, tablero ni protección de `main`, y sin asignar ni mencionar a nadie en GitHub. Se mantienen los tags `turno-N-nombre`. Detalle en `AGENTS.md` → "Git" | Juan · 30-oct-2026 |
@@ -124,12 +124,18 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | `20261101020000_cancel_invoice_unpaid.sql` | T2 | RPC `cancel_unpaid_invoice` (RF-37): anula un recibo **sin pagos** y revierte `is_paid`. Solo admin | Sí, 31-oct-2026 |
 | `20261101030000_delivery_web.sql` | T3 | Pertenencia/estado, costo configurable, mover ítems sin borrar recibos (D12), cancelación atómica sin volver a pedir delivery (D13), protección de rechazo. El teléfono se valida solo en la web | Sí, 1-nov-2026 |
 | `20261101030100_realtime_t3.sql` | T3 | Publica packages, package_status_history, deliveries, invoice_items y payments, sin cambiar RLS | Sí, 1-nov-2026 |
+| `20261104000000_seguridad_rls_t4.sql` | T4 | **Seguridad:** cierra la lectura de pedidos sin sesión, `accept_delivery`, `complete_delivery` y `delivery_balance` sin control, y el acceso de almacén a pagos. Historial inmutable (RNF-30) | Sí, 4-nov-2026 |
+| `20261104000100_notifications.sql` | T4 | Tabla `notifications`, RLS, Realtime y triggers (D5) | Sí, 4-nov-2026 |
+| `20261104000200_dashboard_y_operaciones.sql` | T4 | RPC `admin_dashboard`, `register_package` y `reissue_invoice`, vista `packages_with_status` e índices (RNF-39) | Sí, 4-nov-2026 |
 
 Las de T1 están probadas en Supabase local (`supabase db reset`). Las de T2 las probaron Daviana y Juan en local (9 casos:
 permisos, saltos de estado, recibo doble, anular con pagos, anular dos veces). Solo Juan aplica en producción.
 Después de aplicarlas se regeneró `database.ts` y se quitaron los tipos temporales (`TransactionDatabase`, `as never`).
 Las de T3 las probaron Alberto (44 pruebas pgTAP) y Juan en local, incluida la compatibilidad con las consultas
 `maybeSingle` de la app móvil. Después de aplicarlas, Juan regeneró `database.ts` desde producción (`--linked`).
+
+Las de T4 están probadas en local con `supabase test db` y un recorrido en navegador. Cambian permisos que usa la app móvil
+conservando su flujo: se probó con SQL, **falta probarlo en la app real**. `database.ts` regenerado desde producción.
 
 ## Bitácora de relevos
 Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
@@ -145,6 +151,27 @@ Copiar la plantilla para cada turno cerrado. La entrada más reciente va arriba.
 **Problemas conocidos:** …
 **Notas para el siguiente:** qué necesita saber, por dónde empezar, qué reutilizar
 -->
+
+### T4 · Juan (4-nov-2026 · en curso)
+**Hecho:** RF-54, RF-55, RF-57, RF-58, RF-59 y RNF-01 (pruebas de seguridad por rol fuera de la interfaz). README.
+**Auditoría de seguridad (RNF-01):** se comprobaron en local con la API y se corrigieron en producción: sin sesión se leían
+nombre, teléfono y dirección de los pedidos disponibles y se podía aceptar un pedido a nombre de otro; un cliente podía
+cerrar su pedido y dejar su recibo pagado sin pagar; almacén podía marcar paquetes como pagados; un admin podía editar o
+borrar el historial.
+**Cerrado de turnos anteriores:** RNF-23 (registro de paquete transaccional), RF-67 (paginación de almacén), RF-37 (recibo
+anulado sin salida), RNF-39 (índices).
+**Validación:** lint, typecheck, format:check, build, 67 pruebas Vitest, 116 pruebas SQL y 37 comprobaciones en navegador
+con cada rol (Edge), a 1366 y 390 px. Verificado en producción que los accesos sin sesión se rechazan.
+**Falta, depende de Juan:**
+- Probar en la app móvil real, con la versión nueva del backend: aceptar y entregar un pedido como repartidor, registrar
+  un paquete como almacén, y que la notificación push de un pedido web llegue al teléfono (RF-47, RF-69).
+- Correos (RF-56): cuenta de Resend con dominio verificado, secretos, publicar la función y crear el webhook (README).
+- Publicar la web (D11, RNF-03) y agregar el dominio en las Redirect URLs de Supabase (RF-06).
+- D7: dirección de la sucursal, para mostrarla con el botón "Cómo llegar". Sin ese dato no se construyó.
+- RNF-20: probar en Firefox y Safari. RNF-40 y RNF-42: revisión de los textos legales por la empresa.
+- Al terminar: cerrar este turno y crear el tag `v1.0.0`.
+**Problemas conocidos:** `repartidores update own` deja a un repartidor cambiar cualquier columna de su propio pedido, porque
+la app móvil actualiza esa tabla directamente. La app móvil mantiene tarifas y costo de delivery fijos en su código (RNF-34).
 
 ### T3 · Alberto (1-nov-2026 → 1-nov-2026)
 **Hecho:** RF-11 a RF-15, RF-24 a RF-28, RF-33, RF-38, RF-40 a RF-42, RF-47 a RF-53 y la parte de pedidos de RF-63.
