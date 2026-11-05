@@ -1,11 +1,10 @@
 import type { Role } from '@/features/acceso';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
-import { getLatestStatuses } from './packageStatusService';
 
 export type PackageInput = Pick<
   Database['public']['Tables']['packages']['Insert'],
-  'user_id' | 'tracking_code' | 'shipping_method_id' | 'package_type_id' | 'weight' | 'price'
+  'user_id' | 'tracking_code' | 'shipping_method_id' | 'package_type_id' | 'weight'
 >;
 
 export const PAGE_SIZE = 15;
@@ -126,23 +125,22 @@ export async function findClients(search: string): Promise<Client[]> {
 
 /**
  * Filtros disponibles para el listado de paquetes.
+ * statusIds limita los estados visibles para un rol (RF-67).
  */
 export type PackageFilters = {
   search: string;
   clientId: string;
   statusId: number | null;
+  statusIds?: number[];
 };
 
+const PACKAGE_COLUMNS =
+  'id,tracking_code,shipping_method_id,package_type_id,user_id,weight,price,is_paid,created_at';
+
 /**
- * RF-19: listado de paquetes con filtros.
- *
- * Código y cliente se filtran en PostgreSQL.
- *
- * Para el estado actual, se consulta el último
- * movimiento del historial antes de paginar.
- *
- * En volúmenes grandes, este recorrido deberá
- * optimizarse mediante una vista o RPC.
+ * RF-19 y RF-67: listado de paquetes con filtros.
+ * La vista packages_with_status filtra por estado actual en la base,
+ * así la paginación y el contador coinciden con lo que se muestra.
  */
 export async function listPackages({
   filters,
@@ -156,120 +154,38 @@ export async function listPackages({
     .trim()
     .slice(0, 80);
 
-  function baseQuery() {
-    let query = supabase
-      .from('packages')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false });
+  let query = supabase
+    .from('packages_with_status')
+    .select(PACKAGE_COLUMNS, { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
-    if (term) {
-      query = query.ilike('tracking_code', `%${term}%`);
-    }
+  if (term) query = query.ilike('tracking_code', `%${term}%`);
+  if (filters.clientId) query = query.eq('user_id', filters.clientId);
+  if (filters.statusId !== null) query = query.eq('current_status_id', filters.statusId);
+  if (filters.statusIds) query = query.in('current_status_id', filters.statusIds);
 
-    if (filters.clientId) {
-      query = query.eq('user_id', filters.clientId);
-    }
-
-    return query;
-  }
-
-  /**
-   * Sin filtro de estado:
-   * paginación directa desde PostgreSQL.
-   */
-  if (filters.statusId === null) {
-    const { data, error, count } = await baseQuery().range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-    if (error) {
-      throw error;
-    }
-
-    return {
-      items: data,
-      total: count ?? 0,
-    };
-  }
-
-  /**
-   * Con filtro de estado:
-   * obtener el estado más reciente de cada paquete
-   * antes de aplicar la paginación final.
-   */
-  const matched: PackageRow[] = [];
-  const BATCH = 150;
-
-  for (let offset = 0; ; offset += BATCH) {
-    const { data, error } = await baseQuery().range(offset, offset + BATCH - 1);
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data.length) {
-      break;
-    }
-
-    const latest = await getLatestStatuses(data.map((item) => item.id));
-
-    for (const item of data) {
-      if (latest[item.id]?.status_id === filters.statusId) {
-        matched.push(item);
-      }
-    }
-
-    if (data.length < BATCH) {
-      break;
-    }
-  }
-
-  return {
-    items: matched.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
-    total: matched.length,
-  };
+  const { data, error, count } = await query;
+  if (error) throw error;
+  // Las columnas de una vista se generan como anulables, pero estas vienen tal cual de packages.
+  return { items: data as unknown as PackageRow[], total: count ?? 0 };
 }
 
 /**
- * D2: únicamente almacén puede registrar paquetes.
- *
- * La comprobación del frontend es adicional.
- * La autorización definitiva debe aplicarse
- * mediante las políticas RLS de Supabase.
+ * D2: únicamente almacén registra paquetes.
+ * RF-16 y RNF-23: la RPC calcula el precio y crea el paquete con su estado inicial en una transacción.
  */
 export async function registerPackage(input: PackageInput, role: Role): Promise<void> {
-  // El rol llega de useRequiredCurrentUser(); no se vuelve a pedir a la base.
   if (role !== 'almacen') {
     throw new Error('Solo almacén registra paquetes.');
   }
-
-  /**
-   * Registrar paquete.
-   */
-  const { data: created, error } = await supabase.from('packages').insert(input).select('id').single();
-
-  if (error) {
-    throw error;
-  }
-
-  /**
-   * Registrar el estado inicial.
-   *
-   * El esquema actual no dispone de una RPC
-   * transaccional para registrar el paquete
-   * y su primer estado conjuntamente.
-   *
-   * Si falla esta operación, no se debe volver
-   * a insertar el mismo paquete.
-   */
-  const { error: statusError } = await supabase.from('package_status_history').insert({
-    package_id: created.id,
-    status_id: 1,
-    notes: 'Recibido en Estados Unidos',
+  const { error } = await supabase.rpc('register_package', {
+    p_user_id: input.user_id,
+    p_tracking_code: input.tracking_code,
+    p_shipping_method_id: input.shipping_method_id,
+    p_package_type_id: input.package_type_id,
+    p_weight: input.weight ?? 0,
   });
-
-  if (statusError) {
-    throw new Error(
-      'Se guardó el paquete, pero falló su estado inicial. No lo registres otra vez; informa al encargado para revisarlo.',
-    );
-  }
+  if (error) throw error;
 }

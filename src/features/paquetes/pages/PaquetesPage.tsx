@@ -23,7 +23,7 @@ import { RegisterPackageModal } from '../components/RegisterPackageModal';
 import { useClientSearch, usePackages } from '../hooks/usePackages';
 import { PAGE_SIZE } from '../services/packagesService';
 
-/** Listado e historial (T2). El filtrado visual no sustituye RLS para RF-67. */
+/** Listado e historial. Almacén solo ve los estados 1 y 2 (RF-67). */
 export function PaquetesPage() {
   const current = useRequiredCurrentUser();
   const [open, setOpen] = useState(false);
@@ -39,17 +39,13 @@ export function PaquetesPage() {
   });
   const clients = useClientSearch(clientTerm);
   const [page, setPage] = useState(0);
-  const query = usePackages(filters, page);
+  const query = usePackages(current.role === 'almacen' ? { ...filters, statusIds: [1, 2] } : filters, page);
   const count = query.data?.total ?? 0;
   const statusCatalog = useStatusCatalog();
   const packageIds = query.data?.items.map((item) => item.id) ?? [];
   const statuses = useLatestStatuses(packageIds);
   const statusNames = new Map(statusCatalog.data?.map((item) => [item.id, item.name]) ?? []);
-  const items = (query.data?.items ?? []).filter(
-    (item) =>
-      current.role !== 'almacen' ||
-      Boolean(statuses.data?.[item.id] && statuses.data[item.id].status_id <= 2),
-  );
+  const items = query.data?.items ?? [];
   function exportCurrentPage() {
     downloadCsv(
       `semtracar-paquetes-pagina-${page + 1}.csv`,

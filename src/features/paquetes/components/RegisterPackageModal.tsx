@@ -19,7 +19,7 @@ export function RegisterPackageModal({ open, onClose }: { open: boolean; onClose
   const [weight, setWeight] = useState('');
   const parsedWeight = Number(weight);
   const tariff = config.data?.ratesByShippingMethod[Number(method)];
-  // 'Otros' (id 4) se calcula como Ropa por decisión del equipo.
+  // Vista previa: el precio definitivo lo calcula register_package. 'Otros' (id 4) se cobra ×1.00.
   const multiplier = Number(type) === 4 ? 1 : config.data?.multipliersByPackageType[Number(type)];
   const validPrice =
     Number.isFinite(parsedWeight) &&
@@ -45,7 +45,6 @@ export function RegisterPackageModal({ open, onClose }: { open: boolean; onClose
         shipping_method_id: Number(method),
         package_type_id: Number(type),
         weight: parsedWeight,
-        price: calculatedPrice,
       });
       toast.success('Paquete registrado con estado Recibido.');
       setSearch('');
@@ -56,14 +55,8 @@ export function RegisterPackageModal({ open, onClose }: { open: boolean; onClose
       setWeight('');
       onClose();
     } catch (error) {
-      // No ocultar el error de conciliación si el segundo paso de registro falló.
       toast.error(
-        error instanceof Error && error.message.startsWith('Se guardó el paquete')
-          ? error.message
-          : toUserMessage(
-              error,
-              'No se pudo registrar el paquete. Verifica si el código de rastreo ya existe.',
-            ),
+        toUserMessage(error, 'No se pudo registrar el paquete. Verifica si el código de rastreo ya existe.'),
       );
     }
   }

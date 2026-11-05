@@ -88,3 +88,20 @@ export async function markPackageReady(input: { packageId: string; location: str
   if (!data) throw new Error('La base de datos no devolvió el identificador del recibo.');
   return data;
 }
+
+export async function hasActiveInvoice(packageId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('invoice_items')
+    .select('invoice:invoices!inner(status)')
+    .eq('package_id', packageId)
+    .neq('invoice.status', 'anulada')
+    .limit(1);
+  if (error) throw error;
+  return data.length > 0;
+}
+
+/** RF-37: para un paquete listo cuyo recibo se anuló. */
+export async function reissueInvoice(packageId: string): Promise<void> {
+  const { error } = await supabase.rpc('reissue_invoice', { p_package_id: packageId });
+  if (error) throw error;
+}

@@ -9,12 +9,15 @@ import {
   TextField,
   useToast,
 } from '@/components/ui';
+import { toUserMessage } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
 import type { PackageRow } from '../services/packagesService';
 import {
   useAddPackageStatus,
+  useHasActiveInvoice,
   useMarkPackageReady,
   usePackageHistory,
+  useReissueInvoice,
   useStatusCatalog,
 } from '../hooks/usePackageStatuses';
 import type { StatusRole } from '../services/packageStatusService';
@@ -29,9 +32,11 @@ export function PackageStatusModal({ selected, role, onClose }: Props) {
   const catalog = useStatusCatalog();
   const mutation = useAddPackageStatus();
   const readyMutation = useMarkPackageReady();
-  const busy = mutation.isPending || readyMutation.isPending;
+  const reissue = useReissueInvoice();
+  const busy = mutation.isPending || readyMutation.isPending || reissue.isPending;
   const records = history.data ?? [];
   const last = records.at(-1);
+  const activeInvoice = useHasActiveInvoice(selected?.id ?? null, role === 'admin' && last?.status_id === 4);
   const names = new Map(catalog.data?.map((item) => [item.id, item.name]) ?? []);
   const available = last
     ? (catalog.data ?? []).filter(
@@ -44,8 +49,8 @@ export function PackageStatusModal({ selected, role, onClose }: Props) {
     if (!selected || !nextStatus) return;
     try {
       if (Number(nextStatus) === 4) {
-        const invoiceId = await readyMutation.mutateAsync({ packageId: selected.id, location });
-        toast.success(`Paquete listo para recoger. Recibo generado (${invoiceId.slice(0, 8)}…).`);
+        await readyMutation.mutateAsync({ packageId: selected.id, location });
+        toast.success('Paquete listo para recoger. Recibo generado.');
       } else {
         await mutation.mutateAsync({ packageId: selected.id, statusId: Number(nextStatus), location, role });
         toast.success('Estado actualizado correctamente.');
@@ -54,6 +59,16 @@ export function PackageStatusModal({ selected, role, onClose }: Props) {
       setLocation('');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'No se pudo registrar el estado.');
+    }
+  }
+
+  async function generateAgain() {
+    if (!selected) return;
+    try {
+      await reissue.mutateAsync(selected.id);
+      toast.success('Se generó un nuevo recibo.');
+    } catch (error) {
+      toast.error(toUserMessage(error, 'No se pudo generar el recibo.'));
     }
   }
 
@@ -99,6 +114,16 @@ export function PackageStatusModal({ selected, role, onClose }: Props) {
                 </li>
               ))}
             </ol>
+          )}
+          {activeInvoice.data === false && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 p-3">
+              <p className="text-sm text-amber-900">
+                Este paquete no tiene un recibo activo porque se anuló.
+              </p>
+              <Button size="sm" loading={reissue.isPending} onClick={() => void generateAgain()}>
+                Generar recibo de nuevo
+              </Button>
+            </div>
           )}
           {available.length > 0 ? (
             <form

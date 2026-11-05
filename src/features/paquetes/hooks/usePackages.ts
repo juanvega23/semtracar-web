@@ -11,7 +11,7 @@ import {
 
 export function usePackages(filters: PackageFilters, page: number) {
   return useQuery({
-    queryKey: ['packages', filters.search, filters.clientId, filters.statusId, page],
+    queryKey: ['packages', filters.search, filters.clientId, filters.statusId, filters.statusIds, page],
     queryFn: () => listPackages({ filters, page }),
   });
 }

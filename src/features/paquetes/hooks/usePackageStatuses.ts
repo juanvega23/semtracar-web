@@ -5,6 +5,8 @@ import {
   getLatestStatuses,
   getPackageHistory,
   getStatusCatalog,
+  hasActiveInvoice,
+  reissueInvoice,
   type StatusRole,
 } from '../services/packageStatusService';
 
@@ -49,7 +51,27 @@ export function useMarkPackageReady() {
         queryClient.invalidateQueries({ queryKey: ['package-history', input.packageId] }),
         queryClient.invalidateQueries({ queryKey: ['package-status-latest'] }),
         queryClient.invalidateQueries({ queryKey: ['packages'] }),
-        queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+        queryClient.invalidateQueries({ queryKey: ['facturacion'] }),
+      ]),
+  });
+}
+
+export function useHasActiveInvoice(packageId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['package-active-invoice', packageId],
+    queryFn: () => hasActiveInvoice(packageId!),
+    enabled: enabled && Boolean(packageId),
+  });
+}
+
+export function useReissueInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: reissueInvoice,
+    onSuccess: (_, packageId) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['package-active-invoice', packageId] }),
+        queryClient.invalidateQueries({ queryKey: ['facturacion'] }),
       ]),
   });
 }
