@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { BellIcon, CloseIcon, cn, LockIcon, Logo, LogoutIcon, MenuIcon, UserIcon } from '@/components/ui';
 import { useRequiredCurrentUser } from '@/features/acceso';
+import { unreadBadge, useUnreadCount } from '@/features/avisos';
 import { formatFullName } from '@/lib/format';
 import { navFor } from '../navigation';
 import { useLogout, userSubtitle } from './session';
@@ -11,6 +12,8 @@ import { UserAvatar, UserMenu } from './UserMenu';
 export function AppLayout() {
   const user = useRequiredCurrentUser();
   const items = navFor(user.role);
+  const unread = useUnreadCount(user.id).data ?? 0;
+  const badge = unreadBadge(unread);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { logout, pending } = useLogout();
@@ -55,7 +58,7 @@ export function AppLayout() {
           <div className="ml-auto flex items-center gap-2 sm:gap-4">
             <NavLink
               to="/avisos"
-              aria-label="Avisos"
+              aria-label={badge ? `Avisos: ${unread} sin leer` : 'Avisos'}
               className={({ isActive }) =>
                 cn(
                   'relative rounded-xl p-2.5 hover:bg-slate-50',
@@ -64,6 +67,14 @@ export function AppLayout() {
               }
             >
               <BellIcon size={22} />
+              {badge && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-[11px] font-bold text-white tabular-nums"
+                >
+                  {badge}
+                </span>
+              )}
             </NavLink>
             <span className="hidden h-8 w-px bg-slate-200 xl:block" aria-hidden="true" />
             <div className="hidden xl:block">
