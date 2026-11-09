@@ -9,6 +9,7 @@ export * from './icons';
 export { Logo } from './Logo';
 export { Modal } from './Modal';
 export { PageHeader } from './PageHeader';
+export { FilterPills, SectionTitle, StatusPill } from './SectionTitle';
 export { ShipmentTimeline, type TimelineStop } from './ShipmentTimeline';
 export { SoftStat } from './SoftStat';
 export { Spinner } from './Spinner';
