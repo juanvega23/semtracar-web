@@ -6,8 +6,8 @@ export type BadgeTone = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | '
 const tones: Record<BadgeTone, string> = {
   neutral: 'bg-slate-100 text-slate-700',
   brand: 'bg-brand-50 text-brand-700',
-  info: 'bg-accent-50 text-accent-700',
-  success: 'bg-emerald-50 text-emerald-700',
+  info: 'bg-[#bbdcfb] text-[#0b2a5b]',
+  success: 'bg-[#bfefd2] text-[#0b3b1e]',
   warning: 'bg-amber-50 text-amber-800',
   danger: 'bg-red-50 text-red-700',
 };
@@ -24,7 +24,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1 rounded-full px-3.5 py-1 text-xs font-bold whitespace-nowrap',
         tones[tone],
         className,
       )}

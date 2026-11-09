@@ -42,3 +42,21 @@ describe('LockedState', () => {
     expect(screen.getByRole('heading', { name: 'Sección bloqueada' })).toBeInTheDocument();
   });
 });
+
+describe('ShipmentTimeline', () => {
+  it('marca el estado actual para lectores de pantalla', async () => {
+    const { ShipmentTimeline } = await import('./ShipmentTimeline');
+    render(
+      <ShipmentTimeline
+        label="Recorrido"
+        stops={[
+          { id: 1, name: 'Recibido', reached: true },
+          { id: 2, name: 'En tránsito', reached: true, current: true },
+          { id: 3, name: 'En aduana', reached: false },
+        ]}
+      />,
+    );
+    expect(screen.getByText('En tránsito').closest('li')).toHaveAttribute('aria-current', 'step');
+    expect(screen.getByText('Recibido').closest('li')).not.toHaveAttribute('aria-current');
+  });
+});

@@ -4,10 +4,13 @@ export { buttonClass, type ButtonSize, type ButtonVariant } from './buttonStyles
 export { Card, CardTitle } from './Card';
 export { cn } from './cn';
 export { Checkbox, SelectField, TextField } from './Field';
+export { IconInput, IconSelect } from './IconField';
 export * from './icons';
 export { Logo } from './Logo';
 export { Modal } from './Modal';
 export { PageHeader } from './PageHeader';
+export { ShipmentTimeline, type TimelineStop } from './ShipmentTimeline';
+export { SoftStat } from './SoftStat';
 export { Spinner } from './Spinner';
 export { EmptyState, ErrorState, LoadingState, LockedState } from './States';
 export { Table, Td, Th } from './Table';

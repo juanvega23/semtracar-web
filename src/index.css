@@ -2,7 +2,7 @@
 
 /* Identidad SEMTRACAR (RNF-19): colores tomados del logo y de la referencia visual. */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
   /* Naranja de marca: botones principales, pestaña activa */
   --color-brand-50: #fff6f1;
@@ -11,7 +11,7 @@
   --color-brand-300: #ffa274;
   --color-brand-400: #fe7a3d;
   --color-brand-500: #fc5207;
-  --color-brand-600: #e04502;
+  --color-brand-600: #e54f1d;
   --color-brand-700: #b93805;
   --color-brand-800: #932f0c;
   --color-brand-900: #77290d;
@@ -26,7 +26,7 @@
   --color-ink-600: #34427a;
   --color-ink-700: #2b3664;
   --color-ink-800: #222e5e;
-  --color-ink-900: #21284b;
+  --color-ink-900: #202548;
 
   /* Azul de marca: "Listo para recoger", enlaces */
   --color-accent-50: #eef5ff;
@@ -42,7 +42,7 @@
   }
 
   body {
-    @apply bg-slate-50 font-sans text-ink-900 antialiased;
+    @apply bg-white font-sans text-ink-900 antialiased;
   }
 
   :focus-visible {

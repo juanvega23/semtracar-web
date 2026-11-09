@@ -36,7 +36,7 @@ function FieldShell({ id, label, error, hint, required, children }: FieldShellPr
 
 const controlClass = (hasError: boolean) =>
   cn(
-    'h-11 w-full rounded-xl border bg-white px-3.5 text-base text-ink-900 placeholder:text-slate-400 sm:text-sm',
+    'h-11 w-full rounded-lg border bg-white px-3.5 text-base text-ink-900 placeholder:text-slate-400 sm:text-sm',
     'transition-colors focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none',
     'disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500',
     hasError ? 'border-red-400' : 'border-slate-300',
