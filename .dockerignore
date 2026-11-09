@@ -1,0 +1,11 @@
+.git
+.github
+*.md
+node_modules
+dist
+coverage
+docs
+supabase
+.env
+.env.*
+Nica Cargo Xpress V2 FINAL

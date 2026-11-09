@@ -1,0 +1,92 @@
+name: CI/CD Docker -> GHCR -> Render
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ---------- CI: verificar, construir, probar y publicar la imagen ----------
+  build-test-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: 1. Descargar el código
+        uses: actions/checkout@v4
+
+      - name: 1.1 Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: 1.2 Verificaciones (lint, typecheck, formato y pruebas)
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run format:check
+          npm run test
+
+      - name: 2. Construir la imagen
+        run: |
+          docker build -t semtracar-web:test \
+            --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" \
+            --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" .
+
+      - name: 3. Prueba sencilla (levantar y hacer curl)
+        run: |
+          docker run -d --name app -p 8080:80 semtracar-web:test
+          sleep 3
+          curl -sf http://localhost:8080 | grep -q "SEMTRACAR"
+          curl -sf http://localhost:8080/rastreo | grep -q "SEMTRACAR"
+          echo "✅ La app responde en / y en /rastreo y contiene 'SEMTRACAR'"
+
+      - name: 4. Logs del contenedor (solo si falló)
+        if: failure()
+        run: docker logs app || true
+
+      - name: 5. Login en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 6. Calcular tags (latest + sha)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha
+
+      - name: 7. Publicar la imagen en GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+  # ---------- CD: redesplegar en Render ----------
+  deploy-render:
+    needs: build-test-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Redesplegar el servicio (Render descarga la nueva imagen :latest)
+        run: curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
