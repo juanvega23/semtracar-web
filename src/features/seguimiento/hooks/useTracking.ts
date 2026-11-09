@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRequiredCurrentUser } from '@/features/acceso';
 import { getPackageHistory, getStatusCatalog } from '@/features/paquetes';
 import { useLiveUpdates } from '@/lib/liveUpdates';
-import { listMyPackages } from '../services/trackingService';
+import { listMyPackages, packageHasDelivery } from '../services/trackingService';
 
 const watches = [{ table: 'packages' }, { table: 'package_status_history' }] as const;
 export function useTracking(page: number, search: string) {
@@ -25,4 +25,12 @@ export function useTrackingHistory(packageId: string | null) {
 }
 export function useTrackingCatalog() {
   return useQuery({ queryKey: ['package-status-catalog'], queryFn: getStatusCatalog, staleTime: 600_000 });
+}
+export function useDeliveryMode(packageId: string | null) {
+  const user = useRequiredCurrentUser();
+  return useQuery({
+    queryKey: ['tracking', user.id, 'delivery-mode', packageId],
+    queryFn: () => packageHasDelivery(packageId!),
+    enabled: Boolean(packageId),
+  });
 }
