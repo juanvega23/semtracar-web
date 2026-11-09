@@ -68,8 +68,11 @@ npm run format         # Prettier (format:check lo verifica en CI)
 npm run test           # Vitest
 npm run build          # build de producción
 supabase gen types typescript --linked > src/types/database.ts   # regenerar tipos
+docker build -t semtracar-web:local --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_ANON_KEY=... .
+docker run -d --name semtracar -p 8081:80 semtracar-web:local     # probar la imagen en http://localhost:8081
 ```
-Al subir a `main`, GitHub Actions corre las mismas verificaciones (pestaña Actions).
+Al subir a `main`, GitHub Actions (`ci-cd.yml`) corre las mismas verificaciones, construye y prueba la imagen Docker,
+la publica en GHCR y redespliega Render (D11). **Todo push a `main` queda publicado en línea.**
 
 ### Probar sin tocar producción (Supabase local, D6)
 Requiere Docker Desktop abierto.

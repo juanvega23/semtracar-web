@@ -28,7 +28,8 @@ npm run test
 npm run build
 ```
 
-GitHub Actions corre lo mismo en cada subida a `main`.
+En cada subida a `main`, GitHub Actions (`.github/workflows/ci-cd.yml`) corre lo mismo, construye la imagen Docker,
+la prueba, la publica en GHCR y redespliega Render.
 
 ## Probar sin tocar producción
 
@@ -59,10 +60,41 @@ AGENTS.md                reglas de trabajo del proyecto
 
 ## Publicar
 
-1. **Web.** En Vercel, importar este repositorio y definir `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
-   `vercel.json` ya resuelve las rutas.
-2. **Auth.** En Supabase → Authentication → URL Configuration, agregar `https://<dominio>/**` a las Redirect URLs.
-   Sin esto, recuperar la contraseña no vuelve a la web.
+La web se publica como imagen Docker en Render (decisión D11), siguiendo la guía de Docker + CI/CD del curso:
+
+```text
+git push ─▶ GitHub Actions ─▶ verificaciones ─▶ docker build ─▶ prueba con curl ─▶ GHCR ─▶ deploy hook de Render
+```
+
+- `Dockerfile`: etapa 1 con Node (`npm ci` + `npm run build`), etapa 2 con nginx sirviendo `dist/`.
+- `docker/default.conf.template`: nginx escucha en `${PORT}` (Render usa 10000) y devuelve `index.html` en cualquier ruta.
+- Vite incrusta `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` **al compilar**, por eso van como `--build-arg`.
+
+**Probar la imagen en local:**
+
+```bash
+docker build -t semtracar-web:local \
+  --build-arg VITE_SUPABASE_URL=<url> --build-arg VITE_SUPABASE_ANON_KEY=<anon-key> .
+docker run -d --name semtracar -p 8081:80 semtracar-web:local                          # http://localhost:8081
+docker run -d --name semtracar-render -e PORT=10000 -p 10000:10000 semtracar-web:local # simula Render
+docker rm -f semtracar semtracar-render
+```
+
+**Configuración única (a mano, en este orden):**
+
+1. **Secrets del repo.** GitHub → Settings → Secrets and variables → Actions: `VITE_SUPABASE_URL` y
+   `VITE_SUPABASE_ANON_KEY` (nunca la `service_role`).
+2. **Primer push.** El job `build-test-push` debe quedar en verde; `deploy-render` falla hasta el paso 5 (es normal).
+3. **GHCR.** Perfil → Packages → `semtracar-web` → Package settings → Change visibility → **Public**.
+4. **Render.** New → Web Service → Existing Image `ghcr.io/juanvega23/semtracar-web:latest`, plan Free.
+5. **Deploy hook.** Render → servicio → Settings → Deploy Hook: copiar la URL y guardarla como secret
+   `RENDER_DEPLOY_HOOK_URL`. Volver a correr el workflow fallido (Re-run failed jobs).
+6. **Auth.** Supabase → Authentication → URL Configuration: `https://<servicio>.onrender.com` como Site URL y
+   `https://<servicio>.onrender.com/**` en Redirect URLs. Sin esto, confirmar la cuenta y recuperar la contraseña no
+   vuelven a la web. Hacerlo en el panel, **nunca** con `supabase config push`.
+
+Rollback: Render → Events → deploy anterior → Rollback, o fijar la imagen `:sha-<commit>` en Settings → Image URL.
+En el plan Free el servicio se duerme tras ~15 min sin visitas y la primera carga tarda 30–50 s.
 
 ## Activar los correos (RF-56)
 

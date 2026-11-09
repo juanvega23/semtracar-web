@@ -103,11 +103,11 @@ Otros: RNF-34 `app_config` (T1, **Hecho**: tabla + `src/lib/appConfig.ts`) · RN
 | D4 | Nombre visible: "Semtracar" o "Nica Cargo Xpress" | Resuelta | Siempre **SEMTRACAR** (logo naranja + azul). No se usa la marca ni el logo de Nica Cargo Xpress | Juan · 30-oct-2026 |
 | D5 | Diseño de la tabla `notifications` y eventos que la alimentan | Resuelta | Tabla `notifications`, una fila por usuario y aviso; solo se lee y se marca como leído. La alimentan triggers, así también salen los avisos de lo hecho en la app móvil. Cliente: cambio de estado, paquete listo, recibo generado o anulado, pago y cambios del pedido. Admin: pedido nuevo. Correo solo para paquete listo, recibo generado y entrega confirmada (RF-56). Un fallo al crear el aviso nunca bloquea la operación | Juan · 4-nov-2026 |
 | D6 | ¿Proyecto Supabase separado para desarrollo? | Resuelta | No se crea otro proyecto en la nube. Las migraciones se prueban en Supabase local (Docker: `supabase start` + `supabase db reset`) antes de que Juan haga `supabase db push` al proyecto real `cargo-express3` | Juan · 30-oct-2026 |
-| D7 | Mapa "Ubicación del paquete" de la referencia visual | Resuelta | Sin mapa embebido: se muestra la dirección de la sucursal y un botón "Cómo llegar" que abre Google Maps en otra pestaña. Sin librería de mapas | Juan · 30-oct-2026 |
+| D7 | Mapa "Ubicación del paquete" de la referencia visual | Resuelta | Mapa ilustrado propio (SVG, sin librería ni API key) de la ruta Miami → Managua que marca la etapa según el estado del paquete. No muestra dirección ni la ubicación del repartidor. Reemplaza la idea anterior de "Cómo llegar" | Juan · 8-nov-2026 |
 | D8 | Flujo de Git (reemplaza brief §7.3–7.4 y §8.2–8.6 en lo que toca a GitHub) | Resuelta | Commits directo a `main`, con `git pull` antes de empezar y verificaciones en verde antes de `git push`. **Sin** Pull Requests, Issues, milestones, etiquetas, tablero ni protección de `main`, y sin asignar ni mencionar a nadie en GitHub. Se mantienen los tags `turno-N-nombre`. Detalle en `AGENTS.md` → "Git" | Juan · 30-oct-2026 |
 | D9 | Qué ve el encargado de almacén en el menú (brief §2 y §5.1 no lo cubren todo) | Resuelta | Paquetes: entra. Facturación y Pedidos: visibles con candado. Retiro, Dashboard y Usuarios: ocultos. Se cambia en `features/acceso/roles.ts` | Juan · 30-oct-2026 |
 | D10 | Menú y rutas del cliente | Resuelta | Como la referencia visual: Rastreo (`/rastreo`), Historial = recibos (`/historial`), Delivery (`/delivery`), Cotizar (`/cotizar`). Avisos en la campana (`/avisos`) y perfil en el menú de usuario | Juan · 30-oct-2026 |
-| D11 | Publicación de la web (Vercel) | Resuelta | Se pospone: por ahora la web solo corre en local (`npm run dev`). `vercel.json` ya está listo. Al publicar: importar el repo, poner `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` y agregar el dominio en las Redirect URLs de Supabase | Juan · 31-oct-2026 |
+| D11 | Publicación de la web (Docker + Render) | Resuelta | Según la guía del curso: imagen Docker (Node compila, nginx sirve); GitHub Actions (`ci-cd.yml`) verifica, construye, prueba y publica en GHCR, y redespliega Render con su deploy hook. Reemplaza a Vercel (se quitó `vercel.json`). Secrets del repo: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `RENDER_DEPLOY_HOOK_URL` | Juan · 8-nov-2026 |
 | D12 | Consolidación de recibos para delivery múltiple | Resuelta | Solo recibos sin pagos y todos sus paquetes. Mover los ítems originales al principal para mantener una sola fila por paquete, compatible con `maybeSingle` móvil. Conservar los secundarios anulados con su número, importes y nota; no borrar recibos ni pagos. | Alberto, aprobada por Juan · 1-nov-2026 |
 | D13 | Cargo al cancelar delivery | Resuelta | Sin pagos: cancelar pedido y quitar delivery del recibo en una transacción. El paquete queda para retiro en sucursal y no puede volver a solicitar delivery, ni simple ni múltiple. Con cualquier pago: bloquear la cancelación automática y exigir revisión administrativa | Alberto, aprobada por Juan · 1-nov-2026 |
 
@@ -162,12 +162,15 @@ borrar el historial.
 anulado sin salida), RNF-39 (índices).
 **Validación:** lint, typecheck, format:check, build, 67 pruebas Vitest, 114 pruebas SQL y 37 comprobaciones en navegador
 con cada rol (Edge), a 1366 y 390 px. Verificado en producción que los accesos sin sesión se rechazan.
+**Diseño y despliegue (8-nov-2026):** todas las pantallas siguen el Figma del equipo (tema Inter, encabezado, login,
+rastreo con mapa de ruta, historial, calcular, perfil, resumen y recibos del admin). Docker y CI/CD a Render (D11);
+el workflow `ci-cd.yml` reemplaza a `ci.yml`.
 **Falta, depende de Juan:**
 - Probar en la app móvil real, con la versión nueva del backend: aceptar y entregar un pedido como repartidor, registrar
   un paquete como almacén, y que la notificación push de un pedido web llegue al teléfono (RF-47, RF-69).
 - Correos (RF-56): cuenta de Resend con dominio verificado, secretos, publicar la función y crear el webhook (README).
-- Publicar la web (D11, RNF-03) y agregar el dominio en las Redirect URLs de Supabase (RF-06).
-- D7: dirección de la sucursal, para mostrarla con el botón "Cómo llegar". Sin ese dato no se construyó.
+- Publicar la web en Render (D11, RNF-03): paquete de GHCR público, servicio en Render, los 3 secrets del repo y la URL
+  `.onrender.com` como Site URL y Redirect URL en Supabase (RF-06). Pasos en el README.
 - RNF-20: probar en Firefox y Safari. RNF-40 y RNF-42: revisión de los textos legales por la empresa.
 - Al terminar: cerrar este turno y crear el tag `v1.0.0`.
 **Problemas conocidos:** `repartidores update own` deja a un repartidor cambiar cualquier columna de su propio pedido, porque
@@ -272,7 +275,7 @@ esqueleto de todas las features con página "Próximamente".
 - `src/app/routes.tsx` → router central; cada feature aporta su `routes.tsx` y su entrada en `src/app/navigation.ts`.
 - `src/features/usuarios/services/usersService.ts` → ejemplo de servicio con búsqueda y paginación en servidor.
 **Decisiones tomadas:** D4, D6, D7, D8, D9, D10 y D11.
-**Desviaciones del brief:** flujo de Git sin PR ni Issues (D8). Sin publicar en Vercel por ahora (D11).
+**Desviaciones del brief:** flujo de Git sin PR ni Issues (D8). Publicación con Docker en Render en vez de Vercel (D11).
 **Migraciones:** 6 (ver "Migraciones aplicadas"). La más importante cierra una escalada de privilegios: antes cualquier
 cliente podía ponerse `is_admin = true` desde la API. Ahora un trigger lo impide (solo admins o SQL del panel).
 **Problemas conocidos:**
