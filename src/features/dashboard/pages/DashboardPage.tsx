@@ -4,28 +4,24 @@ import {
   Button,
   Card,
   CardTitle,
+  ChartIcon,
+  ClockIcon,
   EmptyState,
   ErrorState,
   LoadingState,
   PageHeader,
+  ShipmentTimeline,
+  SoftStat,
   Table,
   Td,
   TextField,
   Th,
+  TruckIcon,
+  UsersIcon,
 } from '@/components/ui';
 import { downloadCsv } from '@/lib/csv';
 import { formatUSD } from '@/lib/format';
-import { barWidth, currentMonth, fetchDashboard } from '../services/dashboardService';
-
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <Card className="sm:p-5">
-      <p className="text-sm text-slate-600">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-ink-900 tabular-nums">{value}</p>
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
-    </Card>
-  );
-}
+import { currentMonth, fetchDashboard } from '../services/dashboardService';
 
 /** RF-58: indicadores de la operación. RF-59: entregas por repartidor. */
 export function DashboardPage() {
@@ -39,8 +35,6 @@ export function DashboardPage() {
   });
 
   const data = query.data;
-  const activePackages = data?.packages_by_status.reduce((sum, item) => sum + item.count, 0) ?? 0;
-  const maxStatus = Math.max(0, ...(data?.packages_by_status.map((item) => item.count) ?? []));
 
   function exportReport() {
     if (!data) return;
@@ -59,7 +53,7 @@ export function DashboardPage() {
   return (
     <>
       <PageHeader
-        title="Dashboard"
+        title="Resumen"
         description="Indicadores de la operación y reporte de entregas."
         actions={
           <div className="w-44">
@@ -82,44 +76,48 @@ export function DashboardPage() {
       ) : (
         <div className="space-y-5" aria-busy={query.isFetching}>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Stat
+            <SoftStat
+              tone="green"
+              icon={<ChartIcon size={24} />}
               label="Ingresos del mes"
               value={formatUSD(data.income)}
-              hint={`Por cobrar en total: ${formatUSD(data.pending_balance)}`}
             />
-            <Stat label="Entregas del mes" value={String(data.deliveries)} hint="Pedidos entregados" />
-            <Stat
-              label="Paquetes activos"
-              value={String(activePackages)}
-              hint="Sin pagar, en cualquier estado"
+            <SoftStat
+              tone="blue"
+              icon={<ClockIcon size={24} />}
+              label="Por cobrar"
+              value={formatUSD(data.pending_balance)}
             />
-            <Stat label="Total de clientes" value={String(data.clients)} hint="Con cuenta en SEMTRACAR" />
+            <SoftStat
+              tone="lilac"
+              icon={<TruckIcon size={24} />}
+              label="Entregas del mes"
+              value={String(data.deliveries)}
+            />
+            <SoftStat
+              tone="peach"
+              icon={<UsersIcon size={24} />}
+              label="Total de clientes"
+              value={String(data.clients)}
+            />
           </div>
 
           <Card>
             <CardTitle>Paquetes activos por estado</CardTitle>
-            <ul className="space-y-3">
-              {data.packages_by_status.map((item) => (
-                <li
-                  key={item.id}
-                  className="grid grid-cols-[8rem_1fr_2.5rem] items-center gap-3 text-sm sm:grid-cols-[11rem_1fr_3rem]"
-                >
-                  <span className="text-ink-800">{item.name}</span>
-                  <span className="h-3 overflow-hidden rounded bg-slate-100" aria-hidden="true">
-                    <span
-                      className="block h-full rounded bg-brand-500"
-                      style={{ width: `${barWidth(item.count, maxStatus)}%` }}
-                    />
-                  </span>
-                  <span className="text-right font-semibold text-ink-900 tabular-nums">{item.count}</span>
-                </li>
-              ))}
-            </ul>
+            <ShipmentTimeline
+              label="Paquetes activos por estado"
+              stops={data.packages_by_status.map((item) => ({
+                id: item.id,
+                name: item.name,
+                reached: item.count > 0,
+                children: <p className="text-3xl font-bold text-ink-900 tabular-nums">{item.count}</p>,
+              }))}
+            />
           </Card>
 
           <Card className="p-0 sm:p-0">
             <div className="flex flex-wrap items-center justify-between gap-3 p-5">
-              <h2 className="text-lg font-semibold text-ink-900">Entregas por repartidor</h2>
+              <h2 className="text-base font-bold text-slate-600 uppercase">Entregas por repartidor</h2>
               <Button
                 variant="outline"
                 size="sm"

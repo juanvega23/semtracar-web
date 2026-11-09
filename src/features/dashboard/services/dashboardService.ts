@@ -33,9 +33,3 @@ export async function fetchDashboard(month: string): Promise<Dashboard> {
   if (error) throw error;
   return dashboardSchema.parse(data);
 }
-
-/** Ancho de cada barra, relativo al mayor. Un valor mayor que cero siempre se alcanza a ver. */
-export function barWidth(value: number, max: number): number {
-  if (value <= 0 || max <= 0) return 0;
-  return Math.max(4, Math.round((value / max) * 100));
-}
