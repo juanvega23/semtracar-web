@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { Button, EmptyState, ErrorState, LoadingState, Modal, SelectField, useToast } from '@/components/ui';
+import {
+  Button,
+  cn,
+  EmptyState,
+  ErrorState,
+  FilterPills,
+  LoadingState,
+  Modal,
+  useToast,
+} from '@/components/ui';
 import { downloadCsv } from '@/lib/csv';
 import { toUserMessage } from '@/lib/errors';
 import { formatDateTime, formatInvoiceNumber } from '@/lib/format';
@@ -12,6 +21,15 @@ import {
   type DeliveryStatus,
 } from '../services/deliveriesService';
 import { DeliveryCard } from './DeliveryCard';
+
+/** Textos cortos para los filtros, para que quepan en una línea. */
+const FILTER_LABELS: Record<DeliveryStatus, string> = {
+  disponible: 'Buscando',
+  aceptado: 'Aceptados',
+  en_camino: 'En camino',
+  entregado: 'Entregados',
+  cancelado: 'Cancelados',
+};
 
 export function OrdersList({ admin = false }: { admin?: boolean }) {
   const [page, setPage] = useState(0);
@@ -75,32 +93,33 @@ export function OrdersList({ admin = false }: { admin?: boolean }) {
   }
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-52">
-          <SelectField
-            label="Estado del pedido"
-            value={status}
-            disabled={cancel.isPending}
-            onChange={(event) => {
-              setPage(0);
-              setStatus(event.target.value);
-            }}
-          >
-            <option value="">Todos los estados</option>
-            {Object.entries(DELIVERY_STATUSES).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </SelectField>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FilterPills
+          label="Estado del pedido"
+          value={status}
+          disabled={cancel.isPending}
+          onChange={(value) => {
+            setPage(0);
+            setStatus(value);
+          }}
+          options={[
+            { value: '', label: 'Todos' },
+            ...Object.entries(FILTER_LABELS).map(([value, label]) => ({ value, label })),
+          ]}
+        />
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
+          >
             Actualizar
           </Button>
           {admin && (
             <Button
               variant="outline"
+              size="sm"
               disabled={query.isFetching || query.isError || !query.data?.items.length}
               onClick={exportPage}
             >
@@ -124,12 +143,17 @@ export function OrdersList({ admin = false }: { admin?: boolean }) {
         />
       ) : (
         <>
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className={cn('grid gap-5', admin && 'xl:grid-cols-2')}>
             {query.data.items.map((delivery) => (
               <div key={delivery.id} className="space-y-2">
                 <DeliveryCard delivery={delivery} admin={admin} />
                 {admin && ['disponible', 'aceptado', 'en_camino'].includes(delivery.status) && (
-                  <Button variant="outline" disabled={cancel.isPending} onClick={() => setSelected(delivery)}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    disabled={cancel.isPending}
+                    onClick={() => setSelected(delivery)}
+                  >
                     Cancelar pedido de {formatInvoiceNumber(delivery.invoice?.invoice_number)}
                   </Button>
                 )}
@@ -186,6 +210,7 @@ export function OrdersList({ admin = false }: { admin?: boolean }) {
               Volver
             </Button>
             <Button
+              variant="danger"
               loading={cancel.isPending}
               disabled={!selected?.invoice || Boolean(selected.invoice.payments.length)}
               onClick={() => void cancelSelected()}

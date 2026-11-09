@@ -2,15 +2,20 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Badge,
+  ArchiveIcon,
   Button,
   Card,
-  Checkbox,
+  cn,
   EmptyState,
   ErrorState,
+  IconInput,
   LoadingState,
+  MapPinIcon,
   Modal,
-  TextField,
+  PhoneIcon,
+  SectionTitle,
+  StatusPill,
+  StoreIcon,
   useToast,
 } from '@/components/ui';
 import { useRequiredCurrentUser } from '@/features/acceso';
@@ -23,6 +28,9 @@ import {
   DeliveryValidationError,
   ORDERS_PAGE_SIZE,
 } from '../services/deliveriesService';
+
+/** Sangría de los detalles para alinearlos con el número de recibo. */
+const INDENT = 'pl-9 sm:pl-[6.25rem]';
 
 export function DeliveryRequest() {
   const user = useRequiredCurrentUser();
@@ -88,10 +96,10 @@ export function DeliveryRequest() {
     }
   }
   return (
-    <Card className="space-y-5">
+    <Card className="space-y-6 px-6 py-6">
       <div>
-        <h2 className="text-lg font-semibold">Solicitar entrega a domicilio</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <SectionTitle>Solicitar delivery</SectionTitle>
+        <p className="mt-1 font-medium text-[#8e8e93]">
           El retiro en sucursal es la opción predeterminada. Selecciona recibos completos para llevar todos
           sus paquetes en un pedido.
         </p>
@@ -108,7 +116,7 @@ export function DeliveryRequest() {
       ) : (
         <>
           {!ready && (
-            <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+            <p role="status" className="rounded-xl bg-[#fff4d6] p-3 text-sm font-semibold text-[#9a7400]">
               No hay una tarifa de delivery disponible. Puedes retirar en sucursal o contactar a SEMTRACAR.
             </p>
           )}
@@ -119,87 +127,132 @@ export function DeliveryRequest() {
             />
           ) : (
             <>
-              <div className="space-y-3">
-                {candidates.data.items.map((invoice) => (
-                  <div key={invoice.id} className="space-y-2 rounded-xl border border-slate-200 p-4">
-                    <Checkbox
-                      label={
-                        <span>
-                          <span className="font-semibold">{formatInvoiceNumber(invoice.invoice_number)}</span>{' '}
-                          · {invoice.items.length} paquete(s) · {formatUSD(invoice.total)}
-                        </span>
-                      }
-                      disabled={!ready || !invoice.canRequest || busy}
-                      checked={selected.includes(invoice.id)}
-                      onChange={(event) =>
-                        setSelected((ids) =>
-                          event.target.checked ? [...ids, invoice.id] : ids.filter((id) => id !== invoice.id),
-                        )
-                      }
-                    />
-                    <ul className="pl-7 text-sm text-slate-500">
-                      {invoice.items.map((item) => (
-                        <li key={item.id}>{item.description}</li>
-                      ))}
-                    </ul>
-                    {!invoice.canRequest && (
-                      <p className="text-sm text-amber-700">
-                        {invoice.hasDelivery
-                          ? 'Este recibo ya tiene un pedido de delivery registrado, aunque esté cancelado. No admite otra solicitud.'
-                          : 'Todos los paquetes de este recibo deben estar listos para recoger.'}
-                      </p>
-                    )}
-                    {invoice.delivery_choice === 'rechazado' ? (
-                      <Badge tone="info">Retiro en sucursal</Badge>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={!ready || busy}
-                        onClick={() => void pickup(invoice.id)}
+              <ul className="space-y-3">
+                {candidates.data.items.map((invoice) => {
+                  const checked = selected.includes(invoice.id);
+                  const disabled = !ready || !invoice.canRequest || busy;
+                  return (
+                    <li
+                      key={invoice.id}
+                      className={cn(
+                        'rounded-xl border p-4 transition-colors',
+                        checked ? 'border-brand-600 bg-[#fef9f8]' : 'border-slate-200',
+                      )}
+                    >
+                      <label
+                        className={cn(
+                          'flex items-center gap-4',
+                          disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer',
+                        )}
                       >
-                        Prefiero retirar en sucursal
-                      </Button>
-                    )}
+                        <input
+                          type="checkbox"
+                          className="size-5 shrink-0 accent-[#e54f1d]"
+                          disabled={disabled}
+                          checked={checked}
+                          onChange={(event) =>
+                            setSelected((ids) =>
+                              event.target.checked
+                                ? [...ids, invoice.id]
+                                : ids.filter((id) => id !== invoice.id),
+                            )
+                          }
+                        />
+                        <span
+                          aria-hidden="true"
+                          className="hidden size-12 shrink-0 items-center justify-center rounded-lg bg-[#d5d6dd] text-ink-900 sm:flex"
+                        >
+                          <ArchiveIcon size={26} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-lg font-bold text-ink-900">
+                            {formatInvoiceNumber(invoice.invoice_number)}
+                          </span>
+                          <span className="block text-sm font-semibold text-[#8e8e93]">
+                            {invoice.items.length} paquete(s)
+                          </span>
+                        </span>
+                        <span className="text-lg font-bold text-ink-900 tabular-nums">
+                          {formatUSD(invoice.total)}
+                        </span>
+                      </label>
+                      <ul className={cn('mt-2 space-y-0.5 text-sm text-[#6d7588]', INDENT)}>
+                        {invoice.items.map((item) => (
+                          <li key={item.id}>{item.description}</li>
+                        ))}
+                      </ul>
+                      {!invoice.canRequest && (
+                        <p className={cn('mt-2 text-sm font-semibold text-[#9a7400]', INDENT)}>
+                          {invoice.hasDelivery
+                            ? 'Este recibo ya tiene un pedido de delivery registrado, aunque esté cancelado. No admite otra solicitud.'
+                            : 'Todos los paquetes de este recibo deben estar listos para recoger.'}
+                        </p>
+                      )}
+                      <div className={cn('mt-3', INDENT)}>
+                        {invoice.delivery_choice === 'rechazado' ? (
+                          <StatusPill tone="blue" icon={<StoreIcon size={16} />}>
+                            Retiro en sucursal
+                          </StatusPill>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="px-0! text-[#5b6178] underline-offset-4 hover:bg-transparent! hover:underline"
+                            disabled={!ready || busy}
+                            onClick={() => void pickup(invoice.id)}
+                          >
+                            <StoreIcon size={16} />
+                            Prefiero retirar en sucursal
+                          </Button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              {candidates.data.total > ORDERS_PAGE_SIZE && (
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
+                  <span>
+                    {page * ORDERS_PAGE_SIZE + 1}–
+                    {Math.min(candidates.data.total, (page + 1) * ORDERS_PAGE_SIZE)} de{' '}
+                    {candidates.data.total} recibos
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={page === 0 || busy || candidates.isFetching}
+                      onClick={() => {
+                        setSelected([]);
+                        setPage(page - 1);
+                      }}
+                    >
+                      Anterior
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={
+                        (page + 1) * ORDERS_PAGE_SIZE >= candidates.data.total ||
+                        busy ||
+                        candidates.isFetching
+                      }
+                      onClick={() => {
+                        setSelected([]);
+                        setPage(page + 1);
+                      }}
+                    >
+                      Siguiente
+                    </Button>
                   </div>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
-                <span>
-                  {page * ORDERS_PAGE_SIZE + 1}–
-                  {Math.min(candidates.data.total, (page + 1) * ORDERS_PAGE_SIZE)} de {candidates.data.total}{' '}
-                  recibos
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={page === 0 || busy || candidates.isFetching}
-                    onClick={() => {
-                      setSelected([]);
-                      setPage(page - 1);
-                    }}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={
-                      (page + 1) * ORDERS_PAGE_SIZE >= candidates.data.total || busy || candidates.isFetching
-                    }
-                    onClick={() => {
-                      setSelected([]);
-                      setPage(page + 1);
-                    }}
-                  >
-                    Siguiente
-                  </Button>
                 </div>
-              </div>
-              <form onSubmit={(event) => void submit(event)} className="space-y-4" noValidate>
-                <TextField
+              )}
+              <form onSubmit={(event) => void submit(event)} className="space-y-5" noValidate>
+                <p className="text-lg font-bold text-ink-900">Datos de entrega</p>
+                <IconInput
                   label="Dirección de entrega"
+                  floating
+                  icon={<MapPinIcon size={24} />}
                   required
                   maxLength={250}
                   disabled={busy}
@@ -207,31 +260,48 @@ export function DeliveryRequest() {
                   error={form.formState.errors.address?.message}
                   autoComplete="street-address"
                 />
-                <TextField
+                <IconInput
                   label="Teléfono de contacto"
+                  floating
+                  icon={<PhoneIcon size={24} />}
                   required
                   type="tel"
                   disabled={busy}
                   {...form.register('phone')}
                   error={form.formState.errors.phone?.message}
                   autoComplete="tel"
-                  hint="8 dígitos, con o sin +505."
+                  hint="8 dígitos, con o sin +505. Se guardan en tu perfil."
                 />
-                <p className="text-sm text-slate-500">
-                  La dirección y el teléfono se guardarán en tu perfil antes de solicitar la entrega.
-                </p>
-                <p className="font-semibold">
-                  Cargo por pedido: {formatUSD(config.data.deliveryCost)} · {packageCount} paquete(s)
-                  seleccionado(s)
-                </p>
+                <div className="rounded-xl bg-brand-600 px-6 py-5 text-white">
+                  <p className="text-lg font-bold">Cargo de delivery:</p>
+                  <p className="mt-1 text-[40px] leading-none font-bold tabular-nums">
+                    {formatUSD(config.data.deliveryCost)}
+                  </p>
+                  <dl className="mt-4 space-y-1 border-t border-white/40 pt-3 text-sm font-medium">
+                    <div className="flex justify-between">
+                      <dt>Recibos seleccionados</dt>
+                      <dd className="tabular-nums">{chosen.length}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt>Paquetes</dt>
+                      <dd className="tabular-nums">{packageCount}</dd>
+                    </div>
+                  </dl>
+                  <p className="mt-3 text-xs">
+                    Un solo cargo por pedido, sin importar cuántos paquetes lleve.
+                  </p>
+                </div>
                 {invalidGrouping && (
-                  <p role="alert" className="text-sm text-amber-700">
+                  <p role="alert" className="text-sm font-semibold text-[#9a7400]">
                     Los pedidos de varios paquetes requieren recibos sin pagos para consolidarlos. Solicita
                     revisión a administración.
                   </p>
                 )}
                 <Button
                   type="submit"
+                  variant="gradient"
+                  fullWidth
+                  className="h-[67px]! text-xl!"
                   disabled={
                     !ready ||
                     !chosen.length ||
@@ -256,23 +326,32 @@ export function DeliveryRequest() {
         title="Confirmar delivery"
       >
         <div className="space-y-4">
-          <p>
-            Solicitarás la entrega de {packageCount} paquete(s) por {formatUSD(config.data?.deliveryCost)} de
-            cargo de delivery.
+          <p className="text-lg">
+            Solicitarás la entrega de <strong>{packageCount} paquete(s)</strong> por{' '}
+            <strong>{formatUSD(config.data?.deliveryCost)}</strong> de cargo de delivery.
           </p>
-          <p className="text-sm">Dirección: {form.getValues('address')}</p>
-          <p className="text-sm">Teléfono: {form.getValues('phone')}</p>
+          <div className="space-y-2 rounded-xl bg-[#f6f6f8] p-4 text-sm">
+            <p className="flex items-start gap-2">
+              <MapPinIcon size={18} className="mt-0.5 shrink-0 text-brand-600" />
+              {form.getValues('address')}
+            </p>
+            <p className="flex items-center gap-2">
+              <PhoneIcon size={18} className="shrink-0 text-brand-600" />
+              {form.getValues('phone')}
+            </p>
+          </div>
           {packageCount > 1 && (
             <p className="text-sm text-slate-600">
               Los recibos seleccionados se consolidarán en un solo recibo para este pedido. Los recibos
               secundarios se conservarán como anulados en tu historial.
             </p>
           )}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <Button variant="outline" disabled={busy} onClick={() => setConfirm(false)}>
               Volver
             </Button>
             <Button
+              variant="gradient"
               loading={request.isPending}
               disabled={
                 !ready ||
