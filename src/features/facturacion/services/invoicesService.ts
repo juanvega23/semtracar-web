@@ -14,7 +14,14 @@ export type Invoice = Pick<
   | 'total'
   | 'status'
   | 'created_at'
-> & { notes?: string | null };
+> & { notes?: string | null; package_count?: number };
+
+export type InvoiceFilter = 'todos' | 'pendientes' | 'pagados';
+export const INVOICE_FILTERS: { value: InvoiceFilter; label: string }[] = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'pendientes', label: 'Pendientes' },
+  { value: 'pagados', label: 'Pagados' },
+];
 export type InvoiceItem = Pick<Tables<'invoice_items'>, 'id' | 'description' | 'amount' | 'package_id'>;
 export type Payment = Pick<
   Tables<'payments'>,
@@ -40,12 +47,13 @@ export async function listInvoices(
   page: number,
   search: string,
   userId?: string,
+  status: InvoiceFilter = 'todos',
 ): Promise<{ items: Invoice[]; total: number }> {
   const normalized = search.trim().toUpperCase();
   let query = supabase
     .from('invoices')
     .select(
-      'id,invoice_number,user_id,subtotal,tax_amount,has_delivery,delivery_cost,total,status,created_at,notes',
+      'id,invoice_number,user_id,subtotal,tax_amount,has_delivery,delivery_cost,total,status,created_at,notes,invoice_items(count)',
       { count: 'exact' },
     )
     .eq('document_type', 'recibo')
@@ -54,6 +62,8 @@ export async function listInvoices(
     .range(page * INVOICES_PAGE_SIZE, (page + 1) * INVOICES_PAGE_SIZE - 1);
 
   if (userId) query = query.eq('user_id', userId);
+  if (status === 'pendientes') query = query.in('status', ['pendiente', 'parcial']);
+  if (status === 'pagados') query = query.eq('status', 'pagada');
   if (normalized) {
     const match = /^REC-(\d{1,9})$/.exec(normalized) ?? /^(\d{1,9})$/.exec(normalized);
     if (!match) return { items: [], total: 0 };
@@ -62,7 +72,11 @@ export async function listInvoices(
 
   const { data, error, count } = await query;
   if (error) throw error;
-  return { items: data ?? [], total: count ?? 0 };
+  const items = (data ?? []).map(({ invoice_items, ...invoice }) => ({
+    ...invoice,
+    package_count: invoice_items[0]?.count ?? 0,
+  }));
+  return { items, total: count ?? 0 };
 }
 
 export async function getInvoiceDetail(invoiceId: string): Promise<InvoiceDetail> {

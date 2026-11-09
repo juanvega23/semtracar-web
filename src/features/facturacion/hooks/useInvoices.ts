@@ -5,18 +5,19 @@ import {
   cancelUnpaidInvoice,
   getInvoiceDetail,
   listInvoices,
+  type InvoiceFilter,
   registerInvoicePayment,
 } from '../services/invoicesService';
 
 const invoicesKey = ['facturacion'] as const;
 const watches = [{ table: 'invoices' }, { table: 'invoice_items' }, { table: 'payments' }] as const;
 
-export function useInvoices(page: number, search: string) {
+export function useInvoices(page: number, search: string, status: InvoiceFilter = 'todos') {
   const user = useRequiredCurrentUser();
   useLiveUpdates('facturacion', user.id, watches);
   return useQuery({
-    queryKey: [...invoicesKey, user.id, 'recibos', page, search],
-    queryFn: () => listInvoices(page, search),
+    queryKey: [...invoicesKey, user.id, 'recibos', page, search, status],
+    queryFn: () => listInvoices(page, search, undefined, status),
     placeholderData: keepPreviousData,
     refetchInterval: 30_000,
   });
