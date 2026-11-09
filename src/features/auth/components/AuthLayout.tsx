@@ -1,13 +1,9 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
-import { CheckIcon, Logo } from '@/components/ui';
+import loginBg from '@/assets/login-bg.jpg';
+import { Logo } from '@/components/ui';
 
-const BENEFITS = [
-  'Tu casillero en EE. UU. para comprar en línea',
-  'Rastreo de cada paquete hasta Nicaragua',
-  'Recibos, pagos y delivery a domicilio',
-];
-
+/** Fondo, marca y tarjeta del diseño de inicio de sesión en Figma. */
 export function AuthLayout({
   title,
   description,
@@ -20,58 +16,34 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    <div className="grid min-h-dvh bg-white lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="relative hidden overflow-hidden bg-ink-900 p-12 text-white lg:flex lg:flex-col">
-        <div
-          aria-hidden="true"
-          className="absolute -top-40 -left-32 size-[34rem] rounded-full border-[3rem] border-brand-500/90"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -top-36 -left-24 size-[34rem] rounded-full border-[0.6rem] border-accent-500"
-        />
-        <div className="relative mt-auto">
-          <p className="text-sm font-semibold tracking-widest text-brand-300 uppercase">
-            Casillero internacional
-          </p>
-          <h2 className="mt-3 text-4xl leading-tight font-bold">
-            De Estados Unidos
-            <br />a tu puerta en Nicaragua.
-          </h2>
-          <ul className="mt-8 space-y-3 text-ink-100">
-            {BENEFITS.map((b) => (
-              <li key={b} className="flex items-center gap-3">
-                <span className="flex size-6 items-center justify-center rounded-full bg-brand-500 text-white">
-                  <CheckIcon size={14} />
-                </span>
-                {b}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
-
-      <main className="flex flex-col px-4 py-8 sm:px-10">
-        <Link to="/" className="self-start" aria-label="Ir al inicio">
-          <Logo />
-        </Link>
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
-          <h1 className="text-3xl font-bold tracking-tight text-ink-900">{title}</h1>
-          {description && <p className="mt-2 text-slate-600">{description}</p>}
-          <div className="mt-8">{children}</div>
-          {footer && <div className="mt-8 text-center text-sm text-slate-600">{footer}</div>}
-        </div>
-        <p className="text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} SEMTRACAR ·{' '}
-          <Link to="/terminos" className="hover:text-ink-700">
-            Términos
-          </Link>{' '}
-          ·{' '}
-          <Link to="/privacidad" className="hover:text-ink-700">
-            Privacidad
+    <div
+      className="min-h-dvh bg-[#eceaf3] bg-cover bg-fixed bg-center"
+      style={{ backgroundImage: `url(${loginBg})` }}
+    >
+      <div className="grid min-h-dvh items-center gap-6 px-4 py-8 lg:grid-cols-[46%_36%] lg:gap-0 lg:px-0">
+        <aside className="lg:mt-[27vh] lg:self-start lg:pl-[8.7vw]">
+          <Link to="/" aria-label="Ir al inicio" className="inline-block">
+            <Logo className="h-14 lg:h-[100px] lg:w-[380px] lg:object-contain" />
           </Link>
-        </p>
-      </main>
+          <div className="hidden lg:block">
+            <h2 className="mt-8 text-[33px] leading-tight font-bold text-ink-900">
+              Trazabilidad y control
+              <br />
+              en <span className="text-brand-600">cada envío</span>
+            </h2>
+            <p className="mt-8 max-w-[370px] text-xl leading-snug text-[#6b6b7b]">
+              Inicia sesión para gestionar, supervisar y dar seguimiento a tus envíos desde un solo lugar.
+            </p>
+          </div>
+        </aside>
+
+        <main className="mx-auto w-full max-w-[516px] rounded-xl bg-white px-6 py-10 shadow-[0_2px_8px_rgba(33,40,75,0.2)] sm:px-[76px] sm:py-12">
+          <h1 className="text-center text-[33px] font-bold text-ink-900">{title}</h1>
+          {description && <p className="mt-4 text-center text-[#8e8e93]">{description}</p>}
+          <div className="mt-6">{children}</div>
+          {footer && <div className="mt-8 text-center font-semibold text-[#6b6b7b]">{footer}</div>}
+        </main>
+      </div>
     </div>
   );
 }
