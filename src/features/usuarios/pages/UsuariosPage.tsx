@@ -104,7 +104,7 @@ export function UsuariosPage() {
                         {formatFullName({ name: u.name, last_name: u.lastName })}
                       </Td>
                       <Td className="text-slate-600">{u.email}</Td>
-                      <Td className="font-mono text-xs">{u.casillero}</Td>
+                      <Td className="text-xs font-semibold">{u.casillero}</Td>
                       <Td>
                         <RoleBadge role={u.role} />
                       </Td>

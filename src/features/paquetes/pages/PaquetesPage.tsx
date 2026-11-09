@@ -208,7 +208,7 @@ export function PaquetesPage() {
                 <tbody>
                   {items.map((item) => (
                     <tr key={item.id}>
-                      <Td className="font-mono font-medium">{item.tracking_code}</Td>
+                      <Td className="font-semibold">{item.tracking_code}</Td>
                       <Td>{formatDate(item.created_at)}</Td>
                       <Td>{item.weight} lb</Td>
                       <Td>{formatUSD(item.price)}</Td>

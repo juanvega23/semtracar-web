@@ -131,7 +131,7 @@ export function UserDetailModal({
               <RoleBadge role={user.role} />
             </Item>
             <Item label="Casillero">
-              <span className="font-mono font-semibold">{user.casillero}</span>
+              <span className="font-semibold">{user.casillero}</span>
             </Item>
             <Item label="Correo">
               <span className="break-all">{user.email}</span>

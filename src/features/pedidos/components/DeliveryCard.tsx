@@ -12,7 +12,7 @@ export function DeliveryCard({ delivery, admin = false }: { delivery: Delivery; 
   return (
     <Card className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-mono font-semibold">{formatInvoiceNumber(delivery.invoice?.invoice_number)}</h3>
+        <h3 className="font-semibold">{formatInvoiceNumber(delivery.invoice?.invoice_number)}</h3>
         <Badge
           tone={
             delivery.status === 'entregado' ? 'success' : delivery.status === 'cancelado' ? 'warning' : 'info'

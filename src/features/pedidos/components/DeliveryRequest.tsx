@@ -125,9 +125,7 @@ export function DeliveryRequest() {
                     <Checkbox
                       label={
                         <span>
-                          <span className="font-mono font-semibold">
-                            {formatInvoiceNumber(invoice.invoice_number)}
-                          </span>{' '}
+                          <span className="font-semibold">{formatInvoiceNumber(invoice.invoice_number)}</span>{' '}
                           · {invoice.items.length} paquete(s) · {formatUSD(invoice.total)}
                         </span>
                       }
