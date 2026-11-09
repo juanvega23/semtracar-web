@@ -150,3 +150,8 @@ vite.config.ts.timestamp-*
 
 # Código de la app móvil Flutter: solo referencia local, NUNCA se sube
 /Nica Cargo Xpress V2 FINAL/
+
+# Documentos internos del equipo: solo locales, no se suben
+/CLAUDE.md
+/AGENTS.md
+/docs/

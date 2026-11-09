@@ -31,7 +31,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      // Una feature solo importa lo que otra exporta en su index.ts (brief §6).
+      // Una feature solo importa lo que otra exporta en su index.ts.
       'no-restricted-imports': [
         'error',
         {

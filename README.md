@@ -54,13 +54,13 @@ src/lib/                 cliente de Supabase, formatos, errores, CSV, configurac
 supabase/migrations/     cambios de base de datos versionados
 supabase/functions/      Edge Functions
 supabase/tests/          pruebas SQL
-docs/ESTADO.md           avance, decisiones y bitácora
-AGENTS.md                reglas de trabajo del proyecto
+Dockerfile, docker/      imagen de producción (nginx)
+.github/workflows/       CI/CD con GitHub Actions
 ```
 
 ## Publicar
 
-La web se publica como imagen Docker en Render (decisión D11), siguiendo la guía de Docker + CI/CD del curso:
+La web se publica como imagen Docker en Render, siguiendo la guía de Docker + CI/CD del curso:
 
 ```text
 git push ─▶ GitHub Actions ─▶ verificaciones ─▶ docker build ─▶ prueba con curl ─▶ GHCR ─▶ deploy hook de Render
