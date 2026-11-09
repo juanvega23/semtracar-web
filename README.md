@@ -89,9 +89,12 @@ docker rm -f semtracar semtracar-render
 4. **Render.** New → Web Service → Existing Image `ghcr.io/juanvega23/semtracar-web:latest`, plan Free.
 5. **Deploy hook.** Render → servicio → Settings → Deploy Hook: copiar la URL y guardarla como secret
    `RENDER_DEPLOY_HOOK_URL`. Volver a correr el workflow fallido (Re-run failed jobs).
-6. **Auth.** Supabase → Authentication → URL Configuration: `https://<servicio>.onrender.com` como Site URL y
-   `https://<servicio>.onrender.com/**` en Redirect URLs. Sin esto, confirmar la cuenta y recuperar la contraseña no
-   vuelven a la web. Hacerlo en el panel, **nunca** con `supabase config push`.
+6. **Auth.** Supabase → Authentication → URL Configuration: agregar `https://<servicio>.onrender.com/**` a las
+   Redirect URLs. Sin esto, confirmar la cuenta y recuperar la contraseña no vuelven a la web. **No cambiar el Site URL**
+   (`com.example.testapp://login-callback`): la app móvil se registra sin indicar destino y depende de él; la web siempre
+   indica el suyo. Hacerlo en el panel, **nunca** con `supabase config push`.
+
+Publicada en **https://semtracar.onrender.com**.
 
 Rollback: Render → Events → deploy anterior → Rollback, o fijar la imagen `:sha-<commit>` en Settings → Image URL.
 En el plan Free el servicio se duerme tras ~15 min sin visitas y la primera carga tarda 30–50 s.

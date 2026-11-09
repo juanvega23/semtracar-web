@@ -164,13 +164,13 @@ anulado sin salida), RNF-39 (índices).
 con cada rol (Edge), a 1366 y 390 px. Verificado en producción que los accesos sin sesión se rechazan.
 **Diseño y despliegue (8-nov-2026):** todas las pantallas siguen el Figma del equipo (tema Inter, encabezado, login,
 rastreo con mapa de ruta, historial, calcular, perfil, resumen y recibos del admin). Docker y CI/CD a Render (D11);
-el workflow `ci-cd.yml` reemplaza a `ci.yml`.
+el workflow `ci-cd.yml` reemplaza a `ci.yml`. Publicada en **https://semtracar.onrender.com** (9-nov-2026): imagen en
+GHCR pública, deploy hook activo y `https://semtracar.onrender.com/**` en las Redirect URLs de Supabase. El Site URL se
+dejó en `com.example.testapp://login-callback` porque la app móvil depende de él (RF-06).
 **Falta, depende de Juan:**
 - Probar en la app móvil real, con la versión nueva del backend: aceptar y entregar un pedido como repartidor, registrar
   un paquete como almacén, y que la notificación push de un pedido web llegue al teléfono (RF-47, RF-69).
 - Correos (RF-56): cuenta de Resend con dominio verificado, secretos, publicar la función y crear el webhook (README).
-- Publicar la web en Render (D11, RNF-03): paquete de GHCR público, servicio en Render, los 3 secrets del repo y la URL
-  `.onrender.com` como Site URL y Redirect URL en Supabase (RF-06). Pasos en el README.
 - RNF-20: probar en Firefox y Safari. RNF-40 y RNF-42: revisión de los textos legales por la empresa.
 - Al terminar: cerrar este turno y crear el tag `v1.0.0`.
 **Problemas conocidos:** `repartidores update own` deja a un repartidor cambiar cualquier columna de su propio pedido, porque
