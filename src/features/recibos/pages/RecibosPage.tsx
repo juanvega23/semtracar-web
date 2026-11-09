@@ -1,108 +1,128 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
-  Badge,
+  ArchiveIcon,
   Button,
+  CalendarIcon,
   Card,
+  CheckCircleIcon,
+  CheckSquareIcon,
+  ClockIcon,
+  cn,
   EmptyState,
   ErrorState,
+  InboxIcon,
   LoadingState,
-  PageHeader,
-  Table,
-  Td,
-  TextField,
-  Th,
+  ReceiptIcon,
+  TruckIcon,
 } from '@/components/ui';
+import { useRequiredCurrentUser } from '@/features/acceso';
 import { INVOICES_PAGE_SIZE, InvoiceDetailModal, type Invoice } from '@/features/facturacion';
-import { formatDate, formatInvoiceNumber, formatUSD } from '@/lib/format';
+import { formatShortDate, formatUSD } from '@/lib/format';
 import { useMyInvoices } from '../hooks/useMyInvoices';
 
+const PAYMENT: Record<string, { label: string; className: string }> = {
+  pagada: { label: 'Pagado', className: 'bg-[#e0f7e6] text-[#34c759]' },
+  parcial: { label: 'Pago parcial', className: 'bg-[#fff4d6] text-[#b88a00]' },
+  pendiente: { label: 'Pendiente', className: 'bg-[#e3f2ff] text-[#0088ff]' },
+  anulada: { label: 'Anulado', className: 'bg-[#ffe8e8] text-[#ff383c]' },
+};
+
+function Chip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <span className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ebebee] px-4 text-lg font-semibold text-[#8e8e93]">
+      <span aria-hidden="true">{icon}</span>
+      {children}
+    </span>
+  );
+}
+
 export function RecibosPage() {
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('');
+  const user = useRequiredCurrentUser();
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Invoice | null>(null);
-  const query = useMyInvoices(page, filter);
+  const query = useMyInvoices(page);
   const total = query.data?.total ?? 0;
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    setPage(0);
-    setFilter(search.trim());
-  }
+
   return (
-    <>
-      <PageHeader
-        title="Historial de recibos"
-        description="Consulta tus recibos, pagos y saldos. Descarga tu PDF y QR para el retiro."
-      />
-      <Card>
-        <form onSubmit={submit} className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <TextField
-              label="Número de recibo"
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="REC-00001"
-            />
-          </div>
-          <Button type="submit">Buscar</Button>
-          <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}>
-            Actualizar
-          </Button>
-        </form>
-        {query.isPending ? (
-          <LoadingState message="Cargando tus recibos…" />
-        ) : query.isError ? (
-          <ErrorState onRetry={() => void query.refetch()} />
-        ) : !query.data.items.length ? (
-          <EmptyState
-            title="No se encontraron recibos"
-            description={
-              filter
-                ? 'Revisa el número de recibo.'
-                : 'Tus recibos aparecerán cuando los paquetes estén listos para recoger.'
-            }
-          />
-        ) : (
-          <>
-            <Table>
-              <thead>
-                <tr>
-                  <Th>Recibo</Th>
-                  <Th>Fecha</Th>
-                  <Th>Total</Th>
-                  <Th>Estado</Th>
-                  <Th>Acciones</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {query.data.items.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <Td className="font-mono">{formatInvoiceNumber(invoice.invoice_number)}</Td>
-                    <Td>{formatDate(invoice.created_at)}</Td>
-                    <Td>{formatUSD(invoice.total)}</Td>
-                    <Td>
-                      <Badge
-                        tone={
-                          invoice.status === 'pagada'
-                            ? 'success'
-                            : invoice.status === 'anulada'
-                              ? 'warning'
-                              : 'info'
-                        }
+    <div className="mx-auto max-w-[558px] pt-4 lg:pt-10">
+      <h1 className="sr-only">Historial</h1>
+      {query.isPending ? (
+        <LoadingState message="Cargando tus recibos…" />
+      ) : query.isError ? (
+        <ErrorState onRetry={() => void query.refetch()} />
+      ) : !query.data.items.length ? (
+        <EmptyState
+          title="Todavía no tienes recibos"
+          description="Tus recibos aparecerán cuando los paquetes estén listos para recoger."
+        />
+      ) : (
+        <>
+          <ul className="space-y-5">
+            {query.data.items.map(({ invoice, title, category, method, delivery }) => {
+              const payment = PAYMENT[invoice.status] ?? PAYMENT.pendiente;
+              return (
+                <li key={invoice.id}>
+                  <Card className="px-4 py-8 sm:px-[17px]">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span
+                        aria-hidden="true"
+                        className="flex size-[69px] shrink-0 items-center justify-center rounded-lg bg-[#d5d6dd] text-ink-900"
                       >
-                        {invoice.status}
-                      </Badge>
-                    </Td>
-                    <Td>
-                      <Button size="sm" variant="outline" onClick={() => setSelected(invoice)}>
-                        Ver recibo, PDF y QR
+                        <ArchiveIcon size={38} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-xl font-bold break-all text-ink-900">{title}</h2>
+                        <p className="font-semibold text-[#8e8e93]">{category}</p>
+                      </div>
+                      <span
+                        className={cn(
+                          'inline-flex h-11 items-center gap-2 rounded-full px-4 text-xl font-bold',
+                          payment.className,
+                        )}
+                      >
+                        <CheckCircleIcon size={22} aria-hidden="true" />
+                        {payment.label}
+                      </span>
+                    </div>
+
+                    <hr className="mx-4 my-6 border-[#e3e3e8]" />
+
+                    <div className="flex flex-wrap gap-3">
+                      <Chip icon={<TruckIcon size={24} />}>{method}</Chip>
+                      <Chip icon={<InboxIcon size={22} />}>{user.casillero}</Chip>
+                      <Chip icon={<CalendarIcon size={22} />}>{formatShortDate(invoice.created_at)}</Chip>
+                    </div>
+
+                    <p
+                      className={cn(
+                        'mt-7 inline-flex h-[67px] items-center gap-3 rounded-2xl px-4 text-xl font-bold',
+                        delivery.done ? 'bg-[#cbf1d4] text-[#34c759]' : 'bg-[#e3f2ff] text-[#0088ff]',
+                      )}
+                    >
+                      {delivery.done ? <CheckSquareIcon size={26} /> : <ClockIcon size={26} />}
+                      {delivery.label}
+                    </p>
+
+                    <div className="mt-7 flex flex-wrap items-center justify-between gap-3 px-1">
+                      <p className="text-[31px] font-bold text-ink-900 tabular-nums">
+                        {formatUSD(invoice.total)}
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="h-[63px]! text-xl!"
+                        onClick={() => setSelected(invoice)}
+                      >
+                        <ReceiptIcon size={28} />
+                        Ver recibo
                       </Button>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+                    </div>
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+          {total > INVOICES_PAGE_SIZE && (
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
               <span>
                 {page * INVOICES_PAGE_SIZE + 1}–{Math.min(total, (page + 1) * INVOICES_PAGE_SIZE)} de {total}
@@ -124,10 +144,10 @@ export function RecibosPage() {
                 </Button>
               </div>
             </div>
-          </>
-        )}
-      </Card>
+          )}
+        </>
+      )}
       <InvoiceDetailModal key={selected?.id ?? 'none'} invoice={selected} onClose={() => setSelected(null)} />
-    </>
+    </div>
   );
 }

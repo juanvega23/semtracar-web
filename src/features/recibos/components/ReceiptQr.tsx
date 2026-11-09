@@ -24,7 +24,7 @@ export function ReceiptQr({ invoiceNumber }: { invoiceNumber: number }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 p-4">
       <QRCodeCanvas ref={ref} value={number} size={192} marginSize={4} level="M" title={`QR de ${number}`} />
-      <p className="font-mono text-sm">{number}</p>
+      <p className="text-sm font-semibold">{number}</p>
       <Button variant="outline" size="sm" onClick={download}>
         Descargar QR (PNG)
       </Button>
