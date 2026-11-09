@@ -51,3 +51,13 @@ export function formatInvoiceNumber(invoiceNumber: number | null | undefined): s
 export function formatFullName(user: { name: string; last_name: string }): string {
   return `${user.name} ${user.last_name}`.trim();
 }
+
+/** `29 jul 2026 - 13:21`, como en el seguimiento del envío. */
+export function formatTimelineDate(value: DateInput): string {
+  return formatInTimeZone(toDate(value), TIME_ZONE, 'd MMM yyyy - HH:mm', { locale: es });
+}
+
+/** `28/06/2026` */
+export function formatShortDate(value: DateInput): string {
+  return formatInTimeZone(toDate(value), TIME_ZONE, 'dd/MM/yyyy', { locale: es });
+}
