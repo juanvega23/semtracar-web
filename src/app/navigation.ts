@@ -1,9 +1,10 @@
 import type { ComponentType } from 'react';
 import {
-  CalculatorIcon,
+  CalculatorSquareIcon,
   ChartIcon,
-  ClockIcon,
+  HistoryIcon,
   PackageIcon,
+  RadarIcon,
   ReceiptIcon,
   StoreIcon,
   TruckIcon,
@@ -19,16 +20,16 @@ export type NavItem = {
 };
 
 const CLIENT_NAV: NavItem[] = [
-  { section: 'seguimiento', to: '/rastreo', label: 'Rastreo', icon: PackageIcon },
-  { section: 'recibos', to: '/historial', label: 'Historial', icon: ClockIcon },
+  { section: 'seguimiento', to: '/rastreo', label: 'Rastreo', icon: RadarIcon },
+  { section: 'recibos', to: '/historial', label: 'Historial', icon: HistoryIcon },
   { section: 'misPedidos', to: '/delivery', label: 'Delivery', icon: TruckIcon },
-  { section: 'cotizacion', to: '/cotizar', label: 'Cotizar', icon: CalculatorIcon },
+  { section: 'cotizacion', to: '/cotizar', label: 'Calcular', icon: CalculatorSquareIcon },
 ];
 
 const STAFF_NAV: NavItem[] = [
-  { section: 'dashboard', to: '/admin/dashboard', label: 'Dashboard', icon: ChartIcon },
+  { section: 'dashboard', to: '/admin/dashboard', label: 'Resumen', icon: ChartIcon },
   { section: 'paquetes', to: '/admin/paquetes', label: 'Paquetes', icon: PackageIcon },
-  { section: 'facturacion', to: '/admin/facturacion', label: 'Facturación', icon: ReceiptIcon },
+  { section: 'facturacion', to: '/admin/facturacion', label: 'Recibos', icon: ReceiptIcon },
   { section: 'retiro', to: '/admin/retiro', label: 'Retiro', icon: StoreIcon },
   { section: 'pedidos', to: '/admin/pedidos', label: 'Pedidos', icon: TruckIcon },
   { section: 'usuarios', to: '/admin/usuarios', label: 'Usuarios', icon: UsersIcon },

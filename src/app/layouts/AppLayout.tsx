@@ -12,6 +12,7 @@ import { UserAvatar, UserMenu } from './UserMenu';
 export function AppLayout() {
   const user = useRequiredCurrentUser();
   const items = navFor(user.role);
+  const isClient = user.role === 'cliente';
   const unread = useUnreadCount(user.id).data ?? 0;
   const badge = unreadBadge(unread);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -26,47 +27,51 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-18 max-w-7xl items-center gap-4 px-4 sm:px-6">
+    <div className={cn('min-h-dvh', user.role !== 'cliente' && 'bg-[#e8e6f5]')}>
+      <header className="sticky top-0 z-20 border-b border-ink-900 bg-white">
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-4 px-4 xl:h-[103px] xl:px-10">
           <Link to="/" aria-label="Ir al inicio" className="shrink-0">
-            <Logo className="h-9 sm:h-10" />
+            <Logo className="h-10 xl:h-[56px]" />
           </Link>
 
-          <nav aria-label="Principal" className="ml-6 hidden h-full items-stretch gap-1 xl:flex">
+          <nav
+            aria-label="Principal"
+            className="ml-2 hidden h-full items-stretch gap-1 min-[1400px]:ml-10 min-[1400px]:gap-3 xl:flex"
+          >
             {items.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-2 border-b-[3px] px-3 text-[15px] font-medium transition-colors',
+                    'flex items-center gap-3 border-b-4 px-2 font-bold transition-colors',
+                    isClient ? 'text-lg min-[1400px]:min-w-[158px] min-[1400px]:text-xl' : 'text-[15px]',
                     isActive
-                      ? 'border-brand-500 text-brand-600'
-                      : 'border-transparent text-slate-600 hover:text-ink-900',
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-[#8e8e93] hover:text-ink-900',
                     item.access === 'locked' && !isActive && 'text-slate-400',
                   )
                 }
               >
-                <item.icon size={19} />
+                <item.icon size={isClient ? 26 : 20} />
                 {item.label}
                 {item.access === 'locked' && <LockIcon size={14} aria-label="Bloqueado" />}
               </NavLink>
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2 sm:gap-4">
+          <div className="ml-auto flex items-center gap-2 min-[1400px]:gap-6 sm:gap-4">
             <NavLink
               to="/avisos"
               aria-label={badge ? `Avisos: ${unread} sin leer` : 'Avisos'}
               className={({ isActive }) =>
                 cn(
-                  'relative rounded-xl p-2.5 hover:bg-slate-50',
-                  isActive ? 'text-brand-600' : 'text-ink-800',
+                  'relative rounded-lg p-2.5 hover:bg-slate-100',
+                  isActive ? 'text-brand-600' : 'text-ink-900',
                 )
               }
             >
-              <BellIcon size={22} />
+              <BellIcon size={32} />
               {badge && (
                 <span
                   aria-hidden="true"
@@ -76,7 +81,6 @@ export function AppLayout() {
                 </span>
               )}
             </NavLink>
-            <span className="hidden h-8 w-px bg-slate-200 xl:block" aria-hidden="true" />
             <div className="hidden xl:block">
               <UserMenu user={user} />
             </div>
@@ -143,7 +147,7 @@ export function AppLayout() {
         )}
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-[1440px] px-4 py-5 xl:px-10">
         <Outlet />
       </main>
     </div>
